@@ -6,6 +6,7 @@ import { getBestPosition, useDebounced } from '../lib/hooks.js';
 import { ACCRA } from '../lib/ghana.js';
 import { BaseTiles, LayerToggle, pinIcon, ScrollGuard, SizeFix } from './MapView.jsx';
 import { Spinner } from './ui.jsx';
+import PlacePreview, { placeIcon } from './PlacePreview.jsx';
 
 function Recenter({ point }) {
   const map = useMap();
@@ -157,7 +158,7 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
       <input
         id={inputId}
         value={query}
-        placeholder="Search street, area or landmark — e.g. Accra Mall"
+        placeholder="Search a place, shop, church, school or street — e.g. Accra Mall"
         autoComplete="off"
         role="combobox"
         aria-expanded={open}
@@ -178,11 +179,11 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
           <span className="loc-result-icon home"><House size={15} /></span>
           <span><strong>Home</strong><small>{savedPlace.label}</small></span>
         </li>}
-        {results.map((r, i) => <li key={`${r.id}-${i}`} role="option" aria-selected={i === active} className={i === active ? 'active' : ''} onMouseEnter={() => setActive(i)} onMouseDown={(e) => { e.preventDefault(); choose(r, r.service); }} data-testid={`option-location-${i}`}>
-          <span className="loc-result-icon"><MapPin size={15} /></span>
-          <span><strong>{r.name}</strong><small>{r.secondary || r.label}</small></span>
+        {results.map((r, i) => { const Icon = placeIcon(r.category); return <li key={`${r.id}-${i}`} role="option" aria-selected={i === active} className={i === active ? 'active' : ''} onMouseEnter={() => setActive(i)} onMouseDown={(e) => { e.preventDefault(); choose(r, r.service); }} data-testid={`option-location-${i}`}>
+          <span className="loc-result-icon"><Icon size={15} /></span>
+          <span><strong>{r.name}</strong><small>{[r.category, r.secondary || r.label].filter(Boolean).join(' · ')}</small></span>
           {!r.service?.serviceable && <em>Not served yet</em>}
-        </li>)}
+        </li>; })}
       </ul>}
       {open && typing && !searching && debounced.trim().length >= 2 && results.length === 0 && <div className="loc-results loc-empty">No places found in Ghana. Try a nearby landmark, or tap the map.</div>}
     </div>
@@ -215,5 +216,6 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
       <span>{service.serviceable ? <>Served from our <strong>{service.hub.name}</strong> hub · about {service.distanceKm} km by road. Use “Adjust pin” to put it exactly on your gate.</> : service.reason}</span>
     </div>}
     {notice && <div className="loc-notice">{notice}</div>}
+    {value && !adjusting && <PlacePreview place={value} />}
   </div>;
 }
