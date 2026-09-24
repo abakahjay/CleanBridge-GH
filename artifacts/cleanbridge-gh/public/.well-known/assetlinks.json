@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.cleanbridgegh.app",
+        "sha256_cert_fingerprints": ["80:AF:AD:80:2E:0F:5A:CD:37:1D:DF:70:C0:D5:2D:5D:B4:FF:4D:18:D0:FA:82:BA:22:67:7F:25:DD:E8:8B:64"]
+      }
+    }]
