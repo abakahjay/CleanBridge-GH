@@ -11,9 +11,11 @@
   "devDependencies": {
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-react": "catalog:",
+    "leaflet": "catalog:",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-leaflet": "catalog:",
     "tailwindcss": "catalog:",
     "vite": "catalog:",
     "wouter": "catalog:"
