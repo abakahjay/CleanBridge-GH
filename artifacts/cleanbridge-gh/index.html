@@ -31,5 +31,12 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+      // Installable app: register the service worker as early as possible
+      // (skipped on the Vite dev server so development never serves cached files).
+      if ("serviceWorker" in navigator && !/^(localhost|127.0.0.1)$/.test(location.hostname)) {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+      }
+    </script>
   </body>
 </html>
