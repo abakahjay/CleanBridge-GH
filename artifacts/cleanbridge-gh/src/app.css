@@ -215,6 +215,9 @@ a.data-row.row-link:hover { background: hsl(var(--muted) / .45); }
 .callback-card p { margin: 0; line-height: 1.55; }
 
 /* ---------- Landing ---------- */
+/* The hero and auth panel are always dark, so their text must not follow
+   --card (which is dark in dark mode). */
+.hero, .auth-visual, .public-nav .brand-mark, .auth-visual-top .brand-mark { color: #fbf8f1; }
 .hero-ticks { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin-top: 2rem; color: rgba(255,255,255,.6); font-size: .74rem; }
 .hero-ticks svg { margin-right: .3rem; color: hsl(var(--secondary)); vertical-align: middle; }
 .collector-cta { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 2rem; background: hsl(var(--sidebar)); color: white; }
