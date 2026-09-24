@@ -1,12 +1,12 @@
 import { useRef, useState } from 'react';
-import { useSearch } from 'wouter';
+import { useLocation } from 'wouter';
 import { Camera, CircleAlert, KeyRound, Mail, MapPinned, Save, Trash2, WalletCards } from 'lucide-react';
 import Shell from '../components/Shell.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
 import DeleteAccount from '../components/DeleteAccount.jsx';
 import { Avatar, Spinner } from '../components/ui.jsx';
 import { api, request } from '../lib/api.js';
-import { useAuth } from '../lib/auth.jsx';
+import { homeFor, useAuth } from '../lib/auth.jsx';
 import { useToast } from '../lib/toast.jsx';
 import { detectNetwork, formatPhone, GHANA_POST_GPS_REGEX, isValidGhanaPhone, normalizeGps, REGIONS } from '../lib/ghana.js';
 
@@ -66,7 +66,9 @@ function PhotoCard({ user, setUser }) {
 export default function Profile() {
   const { user, setUser } = useAuth();
   const toast = useToast();
-  const completing = new URLSearchParams(useSearch()).get('complete') === '1' || !user.profileComplete;
+  const [, navigate] = useLocation();
+  // Only a missing phone counts - not a stale ?complete=1 in the URL.
+  const completing = !user.profileComplete;
 
   const [form, setForm] = useState({
     name: user.name, phone: user.phone ? formatPhone(user.phone) : '', address: user.address || '',
@@ -98,9 +100,12 @@ export default function Profile() {
     }
   };
 
-  const saveDetails = (e) => {
+  const saveDetails = async (e) => {
     e.preventDefault();
-    save('details', { name: form.name.trim(), phone: form.phone, ...(user.role === 'collector' ? { collectorStatus: form.collectorStatus } : {}) });
+    const wasCompleting = completing;
+    const ok = await save('details', { name: form.name.trim(), phone: form.phone, ...(user.role === 'collector' ? { collectorStatus: form.collectorStatus } : {}) });
+    // Profile finished: carry on to their dashboard instead of staying here.
+    if (ok && wasCompleting) navigate(homeFor(user.role), { replace: true });
   };
   const saveAddress = (e) => {
     e.preventDefault();
@@ -116,7 +121,7 @@ export default function Profile() {
   };
 
   return <Shell title="Profile" subtitle="Your details, address and account settings.">
-    {completing && !user.profileComplete && <div className="form-alert warn" style={{ marginBottom: '1rem' }}><CircleAlert size={16} /><span><strong>One more step:</strong> add your mobile number so {user.role === 'collector' ? 'customers and operations can reach you and we can pay you' : 'your collector can call you at the gate'}.</span></div>}
+    {completing && <div className="form-alert warn" style={{ marginBottom: '1rem' }}><CircleAlert size={16} /><span><strong>One more step:</strong> add your mobile number so {user.role === 'collector' ? 'customers and operations can reach you and we can pay you' : 'your collector can call you at the gate'}.</span></div>}
     <div className="grid-2 profile-grid">
       <div className="panel panel-pad">
         <PhotoCard user={user} setUser={setUser} />

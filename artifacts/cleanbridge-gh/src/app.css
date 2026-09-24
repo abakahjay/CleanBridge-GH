@@ -225,6 +225,9 @@ a.data-row.row-link:hover { background: hsl(var(--muted) / .45); }
 .live-chip { display: inline-flex; align-items: center; gap: .3rem; padding: .3rem .55rem; border-radius: 999px; background: rgba(33,146,123,.13); color: hsl(var(--primary)); font-size: .66rem; font-weight: 700; }
 .live-chip svg { animation: pulse 1.6s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
+.role-badge { display: inline-flex; align-items: center; gap: .25rem; width: fit-content; margin-top: .3rem; padding: .18rem .5rem; border-radius: 999px; background: hsl(var(--muted)); color: hsl(var(--muted-foreground)); font-size: .64rem; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; }
+.role-badge.role-admin { background: rgba(33,146,123,.14); color: hsl(var(--primary)); }
+.topbar .role-badge { margin-top: 0; padding: .32rem .6rem; }
 .profile-menu { position: relative; }
 .avatar-btn { padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .avatar-btn:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }

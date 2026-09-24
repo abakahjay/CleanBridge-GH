@@ -30,7 +30,7 @@ export default function PaymentCallback() {
 
   return <div className="not-found">
     <div className="callback-card panel panel-pad">
-      <Logo />
+      <Link href="/"><Logo /></Link>
       {state.status === 'checking' && <><Spinner size={26} /><h2>Confirming your payment…</h2><p className="muted">This takes a few seconds. Please don’t close this page.</p></>}
       {state.status === 'failed' && <><CircleAlert size={30} className="tone-orange" /><h2>Payment not completed</h2><p className="muted">Your pickup {state.pickup.code} is still booked. You can try paying again or pay the collector in cash.</p><Link className="btn btn-primary" href={`/pickups/${state.pickup.id}`}>Back to pickup</Link></>}
       {state.status === 'error' && <><CircleAlert size={30} className="tone-orange" /><h2>We couldn’t confirm the payment</h2><p className="muted">{state.message} If money left your wallet, it will show on the pickup within a few minutes.</p><Link className="btn btn-primary" href="/pickups">My pickups</Link></>}

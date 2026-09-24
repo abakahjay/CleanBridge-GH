@@ -41,7 +41,7 @@ const AdminPricing = named(() => import('./pages/admin/Settings.jsx'), 'AdminPri
 const AdminAnalytics = lazy(() => import('./pages/admin/Analytics.jsx'));
 
 function NotFound() {
-  return <div className="not-found"><div><Logo /><h1>404</h1><p>That page is not on today’s collection plan.</p><Link href="/" className="btn btn-primary" data-testid="link-not-found-home"><ArrowLeft size={15} /> Return home</Link></div></div>;
+  return <div className="not-found"><div><Link href="/"><Logo /></Link><h1>404</h1><p>That page is not on today’s collection plan.</p><Link href="/" className="btn btn-primary" data-testid="link-not-found-home"><ArrowLeft size={15} /> Return home</Link></div></div>;
 }
 
 const CUSTOMER = ['customer'];
