@@ -110,7 +110,7 @@ a.data-row.row-link:hover { background: hsl(var(--muted) / .45); }
 .dl-icon { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: .8rem; background: hsl(var(--secondary)); color: #1b2d2f; }
 .dl-meta { font-size: .7rem; }
 .dl-steps { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; font-size: .78rem; line-height: 1.5; }
-.dl-steps svg { vertical-align: -2px; }
+.dl-steps svg, .ios-steps svg, .dl-help svg, .dl-note svg { display: inline-block; vertical-align: -2px; }
 .dl-note { display: flex; gap: .4rem; align-items: center; margin: 0; color: hsl(var(--primary)); font-size: .72rem; }
 .dl-help { max-width: 1060px; margin: 1.5rem auto 0; color: hsl(var(--muted-foreground)); font-size: .78rem; text-align: center; }
 .dl-help a { color: hsl(var(--primary)); font-weight: 700; }
