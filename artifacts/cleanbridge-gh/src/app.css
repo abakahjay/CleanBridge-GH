@@ -76,6 +76,14 @@ a.data-row.row-link:hover { background: hsl(var(--muted) / .45); }
 .ios-steps { margin: 0; padding-left: 1.2rem; display: grid; gap: .6rem; font-size: .84rem; line-height: 1.5; }
 .ios-steps svg { vertical-align: -2px; }
 @media (max-width: 680px) { .nav-install { display: none; } }
+/* Phone top bar: keep logo and buttons on one line. */
+.public-nav .brand-mark, .public-nav .btn { white-space: nowrap; }
+@media (max-width: 480px) {
+  .public-nav { gap: .5rem; }
+  .public-nav .brand-mark { gap: .5rem; font-size: .92rem; }
+  .public-nav .theme-toggle { display: none; }
+  .public-nav .btn { padding: .5rem .7rem; }
+}
 
 .danger-zone { border-color: hsl(var(--destructive) / .35); }
 .legal-page { min-height: 100dvh; padding: 1.5rem 1rem 4rem; background: hsl(var(--background)); }
