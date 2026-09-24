@@ -139,6 +139,7 @@ export default function AuthPage({ mode }) {
           <Field id="password" label="Password" icon={Lock}>
             <PasswordInput id="password" value={form.password} onChange={set('password')} autoComplete={register ? 'new-password' : 'current-password'} testId="input-password" />
           </Field>
+          {!register && <div className="forgot-link"><Link href="/forgot-password" data-testid="link-forgot-password">Forgot password?</Link></div>}
           {register && form.password && <div className="pw-meter" aria-live="polite">
             <div className="pw-bars">{[0, 1, 2, 3].map((i) => <i key={i} className={i < pwScore ? `on s${pwScore}` : ''} />)}</div>
             <span>{STRENGTH_LABEL[pwScore]}</span>

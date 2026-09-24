@@ -11,6 +11,7 @@ import AuthPage, { AuthCallback } from './pages/Auth.jsx';
 import Privacy from './pages/Privacy.jsx';
 import Download from './pages/Download.jsx';
 import About from './pages/About.jsx';
+import { ForgotPassword, ResetPassword } from './pages/PasswordReset.jsx';
 
 // Signed-in areas load on demand so each role only downloads its own pages.
 const named = (loader, name) => lazy(() => loader().then((m) => ({ default: m[name] })));
@@ -84,6 +85,8 @@ function Routes() {
     <Route path="/privacy" component={Privacy} />
     <Route path="/download" component={Download} />
     <Route path="/about" component={About} />
+    <Route path="/forgot-password" component={ForgotPassword} />
+    <Route path="/reset-password" component={ResetPassword} />
     {PRIVATE_ROUTES.map(([path, Page, roles]) => <Route key={path} path={path}><Protected roles={roles}><Suspense fallback={<FullPageLoader />}><Page /></Suspense></Protected></Route>)}
     <Route component={NotFound} />
   </Switch>;

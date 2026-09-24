@@ -94,3 +94,41 @@ export function useAction(onError) {
   }, [onError]);
   return [pending, run];
 }
+
+// Gets the most accurate position available within a few seconds.
+// A quick (possibly cached / Wi-Fi) fix arrives first, then GPS readings keep
+// refining it; we stop at ~25 m accuracy or after maxWaitMs, whichever is first.
+export function getBestPosition({ goodEnoughM = 25, maxWaitMs = 10000 } = {}) {
+  return new Promise((resolve, reject) => {
+    if (!('geolocation' in navigator)) {
+      reject(new Error('This browser cannot share your location. Search for your address instead.'));
+      return;
+    }
+    let best = null;
+    let lastError = null;
+    let done = false;
+    let watchId = null;
+    const consider = (pos) => {
+      const reading = { lat: pos.coords.latitude, lng: pos.coords.longitude, accuracy: pos.coords.accuracy };
+      if (!best || reading.accuracy < best.accuracy) best = reading;
+      if (reading.accuracy <= goodEnoughM) finish();
+    };
+    const finish = () => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      if (best) resolve(best);
+      else reject(new Error(GEO_ERRORS[lastError?.code] || GEO_ERRORS[3]));
+    };
+    const timer = setTimeout(finish, maxWaitMs);
+    const onError = (err) => {
+      lastError = err;
+      if (err.code === 1) finish(); // permission denied - stop now
+    };
+    // Quick first fix (network / recent cache)...
+    navigator.geolocation.getCurrentPosition(consider, onError, { enableHighAccuracy: false, maximumAge: 60000, timeout: maxWaitMs });
+    // ...then keep refining with GPS.
+    watchId = navigator.geolocation.watchPosition(consider, onError, { enableHighAccuracy: true, maximumAge: 0, timeout: maxWaitMs + 5000 });
+  });
+}

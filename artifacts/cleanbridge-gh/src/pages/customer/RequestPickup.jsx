@@ -152,7 +152,7 @@ export default function RequestPickup() {
 
         {step === 1 && <div>
           <h2 className="display step-title">Where should we collect?</h2>
-          <p className="muted step-text">We’ll try to detect your location. Search or drag the pin to your exact gate.</p>
+          <p className="muted step-text">We’ll try to detect your location. Search, or use “Adjust pin” to put it exactly on your gate.</p>
           <LocationPicker value={place} onChange={onPlace} savedPlace={savedPlace} required />
           <div className="field" style={{ marginTop: '1rem' }}>
             <label htmlFor="address">House / building & street</label>

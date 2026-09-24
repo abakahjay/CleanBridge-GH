@@ -1,10 +1,10 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { MapContainer, Marker, useMap, useMapEvents } from 'react-leaflet';
-import { CircleAlert, CircleCheck, Crosshair, House, MapPin, Search, X } from 'lucide-react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { Circle, MapContainer, Marker, useMap } from 'react-leaflet';
+import { Check, CircleAlert, CircleCheck, Crosshair, House, MapPin, Move, Search, X } from 'lucide-react';
 import { api } from '../lib/api.js';
-import { getCurrentPosition, useDebounced } from '../lib/hooks.js';
+import { getBestPosition, useDebounced } from '../lib/hooks.js';
 import { ACCRA } from '../lib/ghana.js';
-import { BaseTiles, pinIcon, SizeFix } from './MapView.jsx';
+import { BaseTiles, LayerToggle, pinIcon, ScrollGuard, SizeFix } from './MapView.jsx';
 import { Spinner } from './ui.jsx';
 
 function Recenter({ point }) {
@@ -15,8 +15,10 @@ function Recenter({ point }) {
   return null;
 }
 
-function MapClicks({ onPick }) {
-  useMapEvents({ click: (e) => onPick({ lat: e.latlng.lat, lng: e.latlng.lng }) });
+// Hands the Leaflet map instance to the picker (for "Adjust pin" mode).
+function MapRef({ onReady }) {
+  const map = useMap();
+  useEffect(() => { onReady(map); }, [map, onReady]);
   return null;
 }
 
@@ -41,6 +43,10 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
   const [service, setService] = useState(null);
   const [notice, setNotice] = useState('');
   const [here, setHere] = useState(null); // user's GPS position, biases search
+  const [layer, setLayer] = useState('map');
+  const [hint, setHint] = useState('');
+  const [adjusting, setAdjusting] = useState(false);
+  const [map, setMap] = useState(null);
   const boxRef = useRef(null);
   // Map/marker handlers are memoized; always call the latest onChange.
   const onChangeRef = useRef(onChange);
@@ -102,13 +108,13 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
     setLocating(true);
     setNotice('');
     try {
-      const pos = await getCurrentPosition();
+      const pos = await getBestPosition();
       setHere(pos);
       await resolvePoint(pos);
-      if (pos.accuracy > 150 && !silent) setNotice(`Location is approximate (±${Math.round(pos.accuracy)} m). Drag the pin to your gate.`);
+      if (pos.accuracy > 60) setNotice(`Your device only knows your position to about ±${Math.round(pos.accuracy)} m. Tap “Adjust pin” and move it to your exact gate — Satellite view helps.`);
     } catch (e) {
       if (!silent) setNotice(e.message);
-      else setNotice('Search for your area or tap the map to set your location.');
+      else setNotice('Search for your area, or tap “Set on map” and move the pin to your gate.');
     } finally {
       setLocating(false);
     }
@@ -128,7 +134,20 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
   };
 
   const point = value ? { lat: value.lat, lng: value.lng } : null;
-  const markerHandlers = useMemo(() => ({ dragend: (e) => { const { lat, lng } = e.target.getLatLng(); resolvePoint({ lat, lng }); } }), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // "Adjust pin": the pin stays in the centre and the map moves under it,
+  // like ride-hailing apps - no accidental taps or drags change the location.
+  const startAdjust = () => {
+    if (!map) return;
+    setAdjusting(true);
+    map.dragging.enable();
+    if (point) map.setView([point.lat, point.lng], Math.max(map.getZoom(), 17));
+  };
+  const confirmAdjust = () => {
+    const c = map.getCenter();
+    setAdjusting(false);
+    resolvePoint({ lat: c.lat, lng: c.lng });
+  };
   const showSaved = savedPlace && !query && open;
 
   return <div className="loc-picker" ref={boxRef}>
@@ -168,21 +187,32 @@ export default function LocationPicker({ value, onChange, autoLocate = true, sav
       {open && typing && !searching && debounced.trim().length >= 2 && results.length === 0 && <div className="loc-results loc-empty">No places found in Ghana. Try a nearby landmark, or tap the map.</div>}
     </div>
 
-    <div className="loc-map" style={{ height }}>
-      <MapContainer center={[(point || ACCRA).lat, (point || ACCRA).lng]} zoom={point ? 16 : 12} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
-        <BaseTiles />
+    <div className={`loc-map ${adjusting ? 'adjusting' : ''}`} style={{ height }}>
+      <LayerToggle layer={layer} onChange={setLayer} />
+      {hint && !adjusting && <div className="map-hint">{hint}</div>}
+      <MapContainer center={[(point || ACCRA).lat, (point || ACCRA).lng]} zoom={point ? 17 : 12} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+        <BaseTiles layer={layer} />
         <SizeFix />
+        <ScrollGuard onHint={setHint} />
+        <MapRef onReady={setMap} />
+        {here && <Circle center={[here.lat, here.lng]} radius={Math.min(here.accuracy || 0, 2000)} pathOptions={{ color: '#2f7cf6', weight: 1, fillOpacity: 0.08 }} interactive={false} />}
         {here && <Marker position={[here.lat, here.lng]} icon={pinIcon('me')} interactive={false} />}
-        {point && <Marker position={[point.lat, point.lng]} icon={pinIcon('home')} draggable eventHandlers={markerHandlers} />}
-        <Recenter point={point} />
-        <MapClicks onPick={resolvePoint} />
+        {point && !adjusting && <Marker position={[point.lat, point.lng]} icon={pinIcon('home')} interactive={false} />}
+        {!adjusting && <Recenter point={point} />}
       </MapContainer>
-      {!point && <div className="loc-map-hint">{locating ? 'Finding you…' : 'Tap the map to drop a pin'}</div>}
+      {adjusting && <div className="center-pin" aria-hidden><span className="cb-pin cb-pin-home"><span><MapPin size={15} /></span></span></div>}
+      <div className="loc-map-actions">
+        {adjusting
+          ? <><button type="button" className="btn btn-outline btn-sm" onClick={() => setAdjusting(false)}>Cancel</button><button type="button" className="btn btn-primary btn-sm" onClick={confirmAdjust} data-testid="button-confirm-pin"><Check size={14} /> Confirm this spot</button></>
+          : <button type="button" className="btn btn-secondary btn-sm" onClick={startAdjust} disabled={!map} data-testid="button-adjust-pin"><Move size={14} /> {point ? 'Adjust pin' : 'Set on map'}</button>}
+      </div>
+      {adjusting && <div className="loc-map-hint">Move the map so the pin sits on your gate</div>}
+      {!point && !adjusting && <div className="loc-map-hint">{locating ? 'Finding your exact location…' : 'Search above or tap “Set on map”'}</div>}
     </div>
 
     {service && value && <div className={`loc-service ${service.serviceable ? 'ok' : 'bad'}`} data-testid="text-service-area">
       {service.serviceable ? <CircleCheck size={15} /> : <CircleAlert size={15} />}
-      <span>{service.serviceable ? <>Served from our <strong>{service.hub.name}</strong> hub · about {service.distanceKm} km by road. Drag the pin to your exact gate.</> : service.reason}</span>
+      <span>{service.serviceable ? <>Served from our <strong>{service.hub.name}</strong> hub · about {service.distanceKm} km by road. Use “Adjust pin” to put it exactly on your gate.</> : service.reason}</span>
     </div>}
     {notice && <div className="loc-notice">{notice}</div>}
   </div>;
