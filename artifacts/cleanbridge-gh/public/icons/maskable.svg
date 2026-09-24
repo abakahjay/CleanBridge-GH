@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 180 180"><rect width="180" height="180" fill="#1B2D2F"/><g transform="translate(27 27) scale(0.7)">
+  
+  <!-- bridge arc -->
+  <path d="M30 128 Q90 70 150 128" fill="none" stroke="#21927B" stroke-width="14" stroke-linecap="round"/>
+  <!-- leaf -->
+  <path d="M90 28 C130 40 138 86 96 112 C60 100 52 56 90 28 Z" fill="#F4B948"/>
+  <path d="M94 104 C92 80 90 62 88 40" fill="none" stroke="#1B2D2F" stroke-width="6" stroke-linecap="round"/>
+  <!-- road line -->
+  <path d="M30 150 H150" stroke="#F4B948" stroke-width="8" stroke-linecap="round" stroke-dasharray="14 16"/>
+
+</g></svg>

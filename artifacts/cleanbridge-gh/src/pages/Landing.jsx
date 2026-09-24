@@ -2,6 +2,7 @@ import { Link } from 'wouter';
 import { ArrowRight, CalendarDays, Check, MapPin, ShieldCheck, WalletCards } from 'lucide-react';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { Logo, ThemeToggle, WhatsAppIcon } from '../components/ui.jsx';
+import InstallApp from '../components/InstallApp.jsx';
 import { AUTHOR_NAME, PORTFOLIO_URL, WHATSAPP_DISPLAY, whatsappLink } from '../lib/contact.js';
 
 const AREAS = ['Accra', 'Tema', 'Kasoa', 'Madina', 'Kumasi', 'Takoradi', 'Cape Coast', 'Koforidua', 'Ho', 'Sunyani', 'Tamale'];
@@ -12,6 +13,7 @@ function PublicNav() {
     <Link href="/" data-testid="link-public-logo"><Logo /></Link>
     <div className="nav-links"><a href="#how-it-works">How it works</a><a href="#for-collectors">For collectors</a><a href="#areas">Areas we serve</a><a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-portfolio">Portfolio</a></div>
     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
+      <InstallApp className="btn btn-ghost on-dark btn-sm nav-install" />
       <ThemeToggle />
       {user
         ? <Link className="btn btn-secondary btn-sm" href={homeFor(user.role)} data-testid="link-dashboard">Open dashboard <ArrowRight size={14} /></Link>
@@ -76,6 +78,7 @@ export default function Landing() {
       <span className="footer-links">
         <a href={whatsappLink()} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={14} /> WhatsApp {WHATSAPP_DISPLAY}</a>
         <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">Portfolio</a>
+        <Link href="/privacy">Privacy</Link>
       </span>
     </div></footer>
   </div>;

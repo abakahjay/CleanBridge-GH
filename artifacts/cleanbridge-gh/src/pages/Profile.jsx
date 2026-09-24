@@ -3,6 +3,7 @@ import { useSearch } from 'wouter';
 import { Camera, CircleAlert, KeyRound, Mail, MapPinned, Save, Trash2, WalletCards } from 'lucide-react';
 import Shell from '../components/Shell.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
+import DeleteAccount from '../components/DeleteAccount.jsx';
 import { Avatar, Spinner } from '../components/ui.jsx';
 import { api, request } from '../lib/api.js';
 import { useAuth } from '../lib/auth.jsx';
@@ -181,6 +182,7 @@ export default function Profile() {
           <button className="btn btn-outline" disabled={saving === 'password' || pw.newPassword.length < 6}>{saving === 'password' ? <Spinner size={15} /> : <KeyRound size={15} />} {user.hasPassword ? 'Update password' : 'Set password'}</button>
         </form>
       </div>
+      <DeleteAccount />
     </div>
   </Shell>;
 }

@@ -9,6 +9,7 @@ import { homeFor, useAuth } from '../lib/auth.jsx';
 import { useApi } from '../lib/hooks.js';
 import { Avatar, Logo, ThemeToggle, WhatsAppIcon } from './ui.jsx';
 import { whatsappLink } from '../lib/contact.js';
+import InstallApp from './InstallApp.jsx';
 
 const NAV = {
   customer: [
@@ -84,6 +85,7 @@ function ProfileMenu({ user }) {
     <button className="avatar-btn" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} data-testid="button-profile-menu"><Avatar user={user} size={36} /></button>
     {open && <div className="menu panel" role="menu">
       <div className="menu-head"><Avatar user={user} size={40} /><div><strong>{user.name}</strong><span>{user.email}</span></div></div>
+      <InstallApp className="menu-item" label="Install the app" />
       <Link href="/profile" className="menu-item" onClick={() => setOpen(false)} role="menuitem"><UserRound size={15} /> Profile & settings</Link>
       <a href={whatsappLink(`Hello CleanBridge GH, this is ${user.name} (${user.role}). I need help with`)} target="_blank" rel="noopener noreferrer" className="menu-item" role="menuitem"><WhatsAppIcon size={15} /> Help on WhatsApp</a>
       <button className="menu-item" role="menuitem" onClick={() => { logout(); navigate('/login'); }} data-testid="button-logout"><LogOut size={15} /> Log out</button>

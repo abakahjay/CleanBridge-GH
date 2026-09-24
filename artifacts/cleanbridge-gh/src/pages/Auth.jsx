@@ -149,7 +149,7 @@ export default function AuthPage({ mode }) {
           </button>
         </form>
 
-        {register && <p className="auth-legal">By continuing you agree to CleanBridge GH’s terms and privacy policy. Your number is only shared with the collector handling your pickup.</p>}
+        {register && <p className="auth-legal">By continuing you agree to CleanBridge GH’s <Link href="/privacy">privacy policy</Link>. Your number is only shared with the collector handling your pickup.</p>}
         <div className="form-foot">
           {register ? <>Already have an account? <Link href="/login" data-testid="link-switch-login">Log in</Link></> : <>New to CleanBridge? <Link href="/register" data-testid="link-switch-register">Create an account</Link></>}
         </div>
