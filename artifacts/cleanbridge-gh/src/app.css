@@ -96,6 +96,27 @@ a.data-row.row-link:hover { background: hsl(var(--muted) / .45); }
 .legal a svg { vertical-align: -2px; }
 .auth-legal a { color: hsl(var(--primary)); font-weight: 700; }
 
+/* Download page */
+.dl-page { max-width: 1100px; margin: auto; }
+.dl-hero { display: flex; align-items: center; gap: 1.2rem; max-width: 1060px; margin: 1rem auto 1.6rem; }
+.dl-hero img { flex: 0 0 auto; border-radius: 22px; box-shadow: var(--shadow-lift); }
+.dl-hero h1 { margin: .3rem 0; font-family: var(--app-font-mono); font-size: clamp(1.7rem, 5vw, 2.6rem); letter-spacing: -.04em; }
+.dl-hero p { margin: 0; line-height: 1.55; }
+.dl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; max-width: 1060px; margin: auto; align-items: start; }
+.dl-card { display: grid; gap: .7rem; padding: 1.3rem; }
+.dl-card.primary { border: 2px solid hsl(var(--primary)); }
+.dl-card h2 { margin: 0; font-family: var(--app-font-mono); font-size: 1.25rem; }
+.dl-card > p { margin: 0; font-size: .8rem; line-height: 1.5; }
+.dl-icon { display: grid; width: 2.8rem; height: 2.8rem; place-items: center; border-radius: .8rem; background: hsl(var(--secondary)); color: #1b2d2f; }
+.dl-meta { font-size: .7rem; }
+.dl-steps { margin: 0; padding-left: 1.1rem; display: grid; gap: .45rem; font-size: .78rem; line-height: 1.5; }
+.dl-steps svg { vertical-align: -2px; }
+.dl-note { display: flex; gap: .4rem; align-items: center; margin: 0; color: hsl(var(--primary)); font-size: .72rem; }
+.dl-help { max-width: 1060px; margin: 1.5rem auto 0; color: hsl(var(--muted-foreground)); font-size: .78rem; text-align: center; }
+.dl-help a { color: hsl(var(--primary)); font-weight: 700; }
+.dl-help svg { vertical-align: -2px; }
+@media (max-width: 900px) { .dl-grid { grid-template-columns: 1fr; } }
+
 /* Toasts */
 .toast-stack { position: fixed; right: 1.2rem; bottom: 5.4rem; z-index: 1000; display: grid; gap: .5rem; max-width: min(380px, calc(100vw - 2rem)); }
 .toast { display: flex; align-items: flex-start; gap: .6rem; padding: .85rem 1rem; border: 1px solid hsl(var(--border)); border-left: 4px solid hsl(var(--primary)); border-radius: .8rem; background: hsl(var(--card)); box-shadow: var(--shadow-lift); color: hsl(var(--foreground)); font-size: .78rem; line-height: 1.45; animation: rise .25s ease both; }

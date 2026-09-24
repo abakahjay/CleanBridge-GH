@@ -30,3 +30,10 @@ services:
       - path: /.well-known/*
         name: Content-Type
         value: application/json
+      # Android app download (installed directly, outside Google Play).
+      - path: /downloads/*.apk
+        name: Content-Type
+        value: application/vnd.android.package-archive
+      - path: /downloads/*.apk
+        name: Content-Disposition
+        value: attachment; filename="CleanBridge-GH.apk"

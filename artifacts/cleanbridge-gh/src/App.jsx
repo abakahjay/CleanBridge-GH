@@ -9,6 +9,7 @@ import WhatsAppButton from './components/WhatsAppButton.jsx';
 import Landing from './pages/Landing.jsx';
 import AuthPage, { AuthCallback } from './pages/Auth.jsx';
 import Privacy from './pages/Privacy.jsx';
+import Download from './pages/Download.jsx';
 
 // Signed-in areas load on demand so each role only downloads its own pages.
 const named = (loader, name) => lazy(() => loader().then((m) => ({ default: m[name] })));
@@ -80,6 +81,7 @@ function Routes() {
     <Route path="/register"><AuthPage mode="register" /></Route>
     <Route path="/auth/callback" component={AuthCallback} />
     <Route path="/privacy" component={Privacy} />
+    <Route path="/download" component={Download} />
     {PRIVATE_ROUTES.map(([path, Page, roles]) => <Route key={path} path={path}><Protected roles={roles}><Suspense fallback={<FullPageLoader />}><Page /></Suspense></Protected></Route>)}
     <Route component={NotFound} />
   </Switch>;

@@ -1,8 +1,7 @@
 import { Link } from 'wouter';
-import { ArrowRight, CalendarDays, Check, MapPin, ShieldCheck, WalletCards } from 'lucide-react';
+import { ArrowRight, CalendarDays, Check, Download, MapPin, ShieldCheck, Smartphone, WalletCards } from 'lucide-react';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { Logo, ThemeToggle, WhatsAppIcon } from '../components/ui.jsx';
-import InstallApp from '../components/InstallApp.jsx';
 import { AUTHOR_NAME, PORTFOLIO_URL, WHATSAPP_DISPLAY, whatsappLink } from '../lib/contact.js';
 
 const AREAS = ['Accra', 'Tema', 'Kasoa', 'Madina', 'Kumasi', 'Takoradi', 'Cape Coast', 'Koforidua', 'Ho', 'Sunyani', 'Tamale'];
@@ -13,7 +12,7 @@ function PublicNav() {
     <Link href="/" data-testid="link-public-logo"><Logo /></Link>
     <div className="nav-links"><a href="#how-it-works">How it works</a><a href="#for-collectors">For collectors</a><a href="#areas">Areas we serve</a><a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-portfolio">Portfolio</a></div>
     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-      <InstallApp className="btn btn-ghost on-dark btn-sm nav-install" />
+      <Link className="btn btn-ghost on-dark btn-sm nav-install" href="/download" data-testid="link-get-app"><Download size={14} /> Get the app</Link>
       <ThemeToggle />
       {user
         ? <Link className="btn btn-secondary btn-sm" href={homeFor(user.role)} data-testid="link-dashboard">Open dashboard <ArrowRight size={14} /></Link>
@@ -34,7 +33,7 @@ export default function Landing() {
           <p className="hero-sub">CleanBridge GH connects homes with trusted collectors across Ghana. Book in a minute, pay with Mobile Money or cash, and follow your collector live on the map.</p>
           <div className="hero-actions">
             <Link className="btn btn-secondary" href="/pickup" data-testid="button-request-pickup">Request a pickup <ArrowRight size={16} /></Link>
-            <Link className="btn btn-ghost on-dark" href="/register?role=collector" data-testid="button-become-collector">Become a collector</Link>
+            <Link className="btn btn-ghost on-dark" href="/download" data-testid="button-hero-download"><Smartphone size={16} /> Get the app</Link>
           </div>
           <div className="hero-ticks"><span><Check size={13} />Pay with MoMo or cash</span><span><Check size={13} />Prices shown upfront</span><span><Check size={13} />Live tracking</span></div>
         </div>
@@ -78,6 +77,7 @@ export default function Landing() {
       <span className="footer-links">
         <a href={whatsappLink()} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={14} /> WhatsApp {WHATSAPP_DISPLAY}</a>
         <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">Portfolio</a>
+        <Link href="/download">Download the app</Link>
         <Link href="/privacy">Privacy</Link>
       </span>
     </div></footer>
