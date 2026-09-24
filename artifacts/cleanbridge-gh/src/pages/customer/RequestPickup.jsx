@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'wouter';
-import { ArrowLeft, ArrowRight, Banknote, Check, CircleAlert, Minus, Plus, Smartphone, Zap } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Banknote, Check, CircleAlert, Minus, Plus, Smartphone, Truck, Zap } from 'lucide-react';
 import Shell from '../../components/Shell.jsx';
 import LocationPicker from '../../components/LocationPicker.jsx';
 import { InfoRow, Spinner } from '../../components/ui.jsx';
+import PriceBreakdown from '../../components/PriceBreakdown.jsx';
 import { api, appUrl } from '../../lib/api.js';
 import { useAuth } from '../../lib/auth.jsx';
 import { useDebounced } from '../../lib/hooks.js';
@@ -13,10 +14,40 @@ import { cedi, formatDate, isoDay } from '../../lib/format.js';
 
 const STEPS = ['Location', 'Waste & time', 'Review & pay'];
 
-const BREAKDOWN_LABELS = {
-  baseFee: 'Base fee', distanceFee: 'Distance from hub', quantityFee: 'Quantity', wasteTypeFee: 'Waste type',
-  urgencyFee: 'Express pickup', weekendFee: 'Weekend', minimumTopUp: 'Minimum charge top-up'
-};
+// Vehicles the customer can choose, with live availability near the pickup.
+function VehiclePicker({ place, wasteType, bags, value, onChange }) {
+  const [state, setState] = useState({ options: null, loading: false });
+  const key = useDebounced(place ? `${place.lat},${place.lng},${wasteType},${bags}` : '', 300);
+
+  useEffect(() => {
+    if (!key) return undefined;
+    let cancelled = false;
+    setState((s) => ({ ...s, loading: true }));
+    api.get(`/pickups/vehicle-options?lat=${place.lat}&lng=${place.lng}&wasteType=${encodeURIComponent(wasteType)}&bags=${bags}`)
+      .then(({ options, recommended }) => {
+        if (cancelled) return;
+        setState({ options, loading: false });
+        // Keep the customer's choice if it still fits; otherwise pick the recommended one.
+        const current = options.find((o) => o.type === value);
+        if (!current || !current.fits) onChange(recommended, true);
+      })
+      .catch(() => { if (!cancelled) setState({ options: [], loading: false }); });
+    return () => { cancelled = true; };
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!state.options) return <div className="muted" style={{ fontSize: '.78rem' }}>{state.loading ? 'Checking vehicles near you…' : 'Set your location to see vehicles.'}</div>;
+  return <div className="vehicle-grid" role="radiogroup" aria-label="Vehicle">
+    {state.options.map((o) => <label key={o.type} className={`vehicle-card ${value === o.type ? 'active' : ''} ${o.fits ? '' : 'disabled'}`}>
+      <input type="radio" name="vehicle" value={o.type} checked={value === o.type} disabled={!o.fits} onChange={() => onChange(o.type, false)} data-testid={`radio-vehicle-${o.type.split(' ')[0].toLowerCase()}`} />
+      <div className="vehicle-top"><Truck size={18} /><strong>{o.type}</strong>{o.recommended && <span className="badge badge-green">Best fit</span>}</div>
+      <span className="vehicle-desc">{o.description}</span>
+      <span className="vehicle-meta">Up to ~{o.capacityBags} bags · {o.fee > 0 ? `+${cedi(o.fee)}` : 'No extra charge'}</span>
+      <span className={`vehicle-avail ${o.available ? 'ok' : ''}`}>
+        {!o.fits ? 'Too small for this load' : o.available ? `${o.available} available now${o.nearestKm != null ? ` · nearest ${o.nearestKm} km` : ''}` : 'None on duty right now — you can still book'}
+      </span>
+    </label>)}
+  </div>;
+}
 
 // Hour (0-23) right now in Accra.
 const accraHour = () => Number(new Date().toLocaleString('en-GB', { timeZone: 'Africa/Accra', hour: '2-digit', hour12: false }));
@@ -41,6 +72,7 @@ export default function RequestPickup() {
   const [timeWindow, setTimeWindow] = useState('');
   const [urgent, setUrgent] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('momo');
+  const [vehicleType, setVehicleType] = useState('');
 
   const [quote, setQuote] = useState(null);
   const [quoteError, setQuoteError] = useState('');
@@ -61,13 +93,13 @@ export default function RequestPickup() {
   };
 
   // Live price as the order changes.
-  const quoteKey = useDebounced(place ? JSON.stringify({ lat: place.lat, lng: place.lng, wasteType, bags, date, urgent }) : '', 350);
+  const quoteKey = useDebounced(place ? JSON.stringify({ lat: place.lat, lng: place.lng, wasteType, bags, date, urgent, vehicleType }) : '', 350);
   useEffect(() => {
     if (!quoteKey) { setQuote(null); return undefined; }
     let cancelled = false;
     setQuoting(true);
     setQuoteError('');
-    api.post('/pickups/quote', { location: { lat: place.lat, lng: place.lng }, wasteType, bags, scheduledDate: date, urgent })
+    api.post('/pickups/quote', { location: { lat: place.lat, lng: place.lng }, wasteType, bags, scheduledDate: date, urgent, vehicleType: vehicleType || undefined })
       .then((q) => { if (!cancelled) setQuote(q); })
       .catch((e) => { if (!cancelled) { setQuote(null); setQuoteError(e.message); } })
       .finally(() => { if (!cancelled) setQuoting(false); });
@@ -77,7 +109,7 @@ export default function RequestPickup() {
   const gpsValue = normalizeGps(gps);
   const gpsInvalid = gps && !GHANA_POST_GPS_REGEX.test(gpsValue);
   const step1Ready = place && service?.serviceable && address.trim().length >= 3 && !gpsInvalid;
-  const step2Ready = timeWindow && date >= today;
+  const step2Ready = timeWindow && date >= today && vehicleType;
 
   const submit = async () => {
     setSubmitting(true);
@@ -89,7 +121,7 @@ export default function RequestPickup() {
         address: address.trim(),
         ghanaPostGps: gps ? gpsValue : undefined,
         gateNote: gateNote.trim() || undefined,
-        wasteType, bags, scheduledDate: date, timeWindow, urgent, paymentMethod
+        wasteType, bags, scheduledDate: date, timeWindow, urgent, paymentMethod, vehicleType
       });
       if (paymentMethod === 'momo') {
         try {
@@ -159,6 +191,10 @@ export default function RequestPickup() {
               <button type="button" className="icon-btn" onClick={() => setBags((b) => Math.min(50, b + 1))} aria-label="More"><Plus size={15} /></button>
             </div>
           </div>
+          <div className="field">
+            <label>Vehicle</label>
+            <VehiclePicker place={place} wasteType={wasteType} bags={bags} value={vehicleType} onChange={(v) => setVehicleType(v)} />
+          </div>
           <div className="input-grid">
             <div className="field"><label htmlFor="date">Date</label><input id="date" type="date" min={today} value={date} onChange={(e) => setDate(e.target.value)} data-testid="input-pickup-date" /></div>
             <div className="field">
@@ -180,6 +216,7 @@ export default function RequestPickup() {
           <div className="data-list panel" style={{ padding: '0 1rem', marginBottom: '1rem' }}>
             <InfoRow label="Where">{address}</InfoRow>
             <InfoRow label="What">{wasteType} · {bags} {unit}{bags > 1 ? 's' : ''}</InfoRow>
+            <InfoRow label="Vehicle">{vehicleType}</InfoRow>
             <InfoRow label="When">{formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })} · {timeWindow}</InfoRow>
             {urgent && <InfoRow label="Priority">Express</InfoRow>}
           </div>
@@ -215,10 +252,8 @@ export default function RequestPickup() {
         {quote && <>
           <div className="quote-total" data-testid="text-quote-total">{cedi(quote.total)}</div>
           <div className="muted" style={{ fontSize: '.72rem', marginBottom: '.8rem' }}>From our {quote.hub?.name} hub · {quote.distanceKm} km by road</div>
-          <div className="data-list">
-            {Object.entries(quote.breakdown).filter(([, v]) => v > 0).map(([k, v]) => <InfoRow key={k} label={BREAKDOWN_LABELS[k] || k}>{cedi(v)}</InfoRow>)}
-          </div>
-          <p className="muted" style={{ fontSize: '.68rem', lineHeight: 1.5, marginTop: '.8rem' }}>Final price is fixed when you book. Weekend and express surcharges apply only when selected.</p>
+          <PriceBreakdown {...quote} vehicleType={vehicleType} />
+          <p className="muted" style={{ fontSize: '.68rem', lineHeight: 1.5, marginTop: '.8rem' }}>Price is fixed when you book. Taxes are Ghana VAT and levies, paid to the Ghana Revenue Authority. Weekend and express charges apply only when they apply to your booking.</p>
         </>}
       </aside>
     </div>

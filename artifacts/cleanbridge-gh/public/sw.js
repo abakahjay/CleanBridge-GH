@@ -3,7 +3,7 @@
 // - Hashed build assets (/assets/*) and icons: cache first (they never change).
 // - Everything else, including the API and map tiles (other origins), is not
 //   touched - prices, pickups and payments must always be live.
-const VERSION = 'cb-v1';
+const VERSION = 'cb-v2';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png', '/offline.html'];
 
 self.addEventListener('install', (event) => {
@@ -46,4 +46,17 @@ self.addEventListener('fetch', (event) => {
       }))
     );
   }
+});
+
+// Tapping a job alert / update notification opens (or focuses) the app.
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const target = (event.notification.data && event.notification.data.url) || '/notifications';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      const open = wins.find((w) => new URL(w.url).origin === self.location.origin);
+      if (open) { open.navigate(target).catch(() => {}); return open.focus(); }
+      return self.clients.openWindow(target);
+    })
+  );
 });

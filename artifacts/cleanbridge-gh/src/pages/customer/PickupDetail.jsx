@@ -4,6 +4,7 @@ import { ArrowLeft, Ban, Navigation, Phone, Smartphone } from 'lucide-react';
 import Shell from '../../components/Shell.jsx';
 import MapView from '../../components/MapView.jsx';
 import { Async, InfoRow, Modal, Spinner, Stars, StatusBadge } from '../../components/ui.jsx';
+import PriceBreakdown from '../../components/PriceBreakdown.jsx';
 import { api, appUrl } from '../../lib/api.js';
 import { useAuth } from '../../lib/auth.jsx';
 import { useAction, useApi } from '../../lib/hooks.js';
@@ -11,10 +12,6 @@ import { useToast } from '../../lib/toast.jsx';
 import { directionsLink, formatPhone, telLink } from '../../lib/ghana.js';
 import { cedi, formatDate, formatDateTime, plural, timeAgo } from '../../lib/format.js';
 
-const BREAKDOWN_LABELS = {
-  baseFee: 'Base fee', distanceFee: 'Distance from hub', quantityFee: 'Quantity', wasteTypeFee: 'Waste type',
-  urgencyFee: 'Express pickup', weekendFee: 'Weekend', minimumTopUp: 'Minimum charge top-up'
-};
 
 function Timeline({ p }) {
   const steps = [
@@ -34,7 +31,8 @@ export default function PickupDetail() {
   const toast = useToast();
   const [, navigate] = useLocation();
   const [confirmCancel, setConfirmCancel] = useState(false);
-  const state = useApi(`/pickups/${params.id}`, { refreshMs: 15000 });
+  const state = useApi(`/pickups/${params.id}`, { refreshMs: 15000, live: true });
+  const settings = useApi('/settings');
   const [pending, run] = useAction((e) => toast(e.message, 'error'));
 
   const pay = () => run(async () => {
@@ -93,13 +91,15 @@ export default function PickupDetail() {
             {p.ghanaPostGps && <InfoRow label="GhanaPost GPS">{p.ghanaPostGps}</InfoRow>}
             {p.gateNote && <InfoRow label="Gate note">{p.gateNote}</InfoRow>}
             <InfoRow label="When">{formatDate(p.scheduledDate)} · {p.timeWindow}</InfoRow>
+            {p.vehicleType && <InfoRow label="Vehicle">{p.vehicleType}</InfoRow>}
             {p.collectorPhone && user.role === 'customer' && <InfoRow label="Collector">{p.collectorName} · {formatPhone(p.collectorPhone)}</InfoRow>}
             {user.role !== 'customer' && <InfoRow label="Customer">{p.customerName} · {formatPhone(p.customerPhone)}</InfoRow>}
           </div>
           <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Payment</h3><StatusBadge status={p.paymentStatus} /></div>
+          <PriceBreakdown breakdown={p.priceBreakdown} subtotal={p.subtotal} taxes={p.taxes} taxTotal={p.taxAmount} total={p.estimatedPrice} vehicleType={p.vehicleType}
+            split={p.collectorEarning != null ? { collector: p.collectorEarning, platform: p.platformFee } : undefined}
+            sharePct={settings.data?.payouts?.collectorSharePct} />
           <div className="data-list">
-            {p.priceBreakdown && Object.entries(p.priceBreakdown).filter(([, v]) => v > 0).map(([k, v]) => <InfoRow key={k} label={BREAKDOWN_LABELS[k] || k}>{cedi(v)}</InfoRow>)}
-            <InfoRow label="Total"><span className="mono" style={{ fontSize: '1rem' }}>{cedi(p.estimatedPrice)}</span></InfoRow>
             <InfoRow label="Method">{p.paymentChannelLabel || (p.cashCollected ? 'Cash' : p.paymentMethod === 'momo' ? 'Online (Paystack)' : 'Cash on pickup')}{p.paidAt ? ` · paid ${formatDateTime(p.paidAt)}` : ''}</InfoRow>
           </div>
           {canPay && <button className="btn btn-secondary btn-block" style={{ marginTop: '1rem' }} onClick={pay} disabled={pending} data-testid="button-pay-momo">

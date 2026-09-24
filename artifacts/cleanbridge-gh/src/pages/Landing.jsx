@@ -1,5 +1,6 @@
 import { Link } from 'wouter';
-import { ArrowRight, CalendarDays, Check, Download, MapPin, ShieldCheck, Smartphone, WalletCards } from 'lucide-react';
+import { ArrowRight, CalendarDays, Check, Compass, Download, Eye, Monitor, MapPin, ShieldCheck, Smartphone, WalletCards } from 'lucide-react';
+import { MISSION, VISION } from '../content/about.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { Logo, ThemeToggle, WhatsAppIcon } from '../components/ui.jsx';
 import { AUTHOR_NAME, PORTFOLIO_URL, WHATSAPP_DISPLAY, whatsappLink } from '../lib/contact.js';
@@ -10,7 +11,7 @@ function PublicNav() {
   const { user } = useAuth();
   return <nav className="public-nav">
     <Link href="/" data-testid="link-public-logo"><Logo /></Link>
-    <div className="nav-links"><a href="#how-it-works">How it works</a><a href="#for-collectors">For collectors</a><a href="#areas">Areas we serve</a><a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-portfolio">Portfolio</a></div>
+    <div className="nav-links"><a href="#how-it-works">How it works</a><a href="#for-collectors">For collectors</a><a href="#areas">Areas we serve</a><Link href="/about">About</Link><a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-portfolio">Portfolio</a></div>
     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
       <Link className="btn btn-ghost on-dark btn-sm nav-install" href="/download" data-testid="link-get-app"><Download size={14} /> Get the app</Link>
       <ThemeToggle />
@@ -72,12 +73,37 @@ export default function Landing() {
       </div>
     </section>
 
+    <section className="section" id="about">
+      <div className="section-heading"><div><div className="eyebrow">About us</div><h2>Bridging homes and collectors for a cleaner Ghana.</h2></div><p>Upfront prices, fair pay for collectors and live tracking — built in Ghana, for Ghana.</p></div>
+      <div className="mv-grid">
+        <div className="panel panel-pad mv-card"><Compass size={20} /><div className="eyebrow">Our mission</div><p>{MISSION}</p></div>
+        <div className="panel panel-pad mv-card"><Eye size={20} /><div className="eyebrow">Our vision</div><p>{VISION}</p></div>
+      </div>
+      <div style={{ marginTop: '1rem' }}><Link className="btn btn-outline" href="/about" data-testid="link-about">Our values, goals & business plan <ArrowRight size={15} /></Link></div>
+    </section>
+
+    <section className="get-app" id="get-app">
+      <div className="section get-app-inner">
+        <div>
+          <div className="eyebrow" style={{ color: 'hsl(var(--secondary))' }}>Get the app</div>
+          <h2>CleanBridge in your pocket.</h2>
+          <p>Free to download. Book pickups, pay and track your collector from your phone or computer.</p>
+        </div>
+        <div className="get-app-buttons">
+          <Link className="store-btn" href="/download" data-testid="link-get-android"><Smartphone size={22} /><span><small>Download for</small>Android</span></Link>
+          <Link className="store-btn" href="/download" data-testid="link-get-iphone"><Smartphone size={22} /><span><small>Add to home screen</small>iPhone</span></Link>
+          <Link className="store-btn" href="/download" data-testid="link-get-desktop"><Monitor size={22} /><span><small>Install on</small>Windows & Mac</span></Link>
+        </div>
+      </div>
+    </section>
+
     <footer className="public-footer"><div className="public-footer-inner">
       <span>© {new Date().getFullYear()} CleanBridge GH · Built by <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-footer-portfolio">{AUTHOR_NAME}</a></span>
       <span className="footer-links">
         <a href={whatsappLink()} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={14} /> WhatsApp {WHATSAPP_DISPLAY}</a>
         <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer">Portfolio</a>
         <Link href="/download">Download the app</Link>
+        <Link href="/about">About</Link>
         <Link href="/privacy">Privacy</Link>
       </span>
     </div></footer>

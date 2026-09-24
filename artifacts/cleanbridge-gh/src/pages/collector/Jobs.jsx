@@ -8,13 +8,13 @@ import { useApi } from '../../lib/hooks.js';
 import { useToast } from '../../lib/toast.jsx';
 import { directionsLink, telLink } from '../../lib/ghana.js';
 import { cedi, formatDate, formatDateTime, plural } from '../../lib/format.js';
-import { AvailabilityToggle, NearbyRequests } from './Dashboard.jsx';
+import { AvailabilityToggle, JobAlertsButton, NearbyRequests } from './Dashboard.jsx';
 
 const TABS = [['mine', 'My jobs'], ['available', 'Available'], ['done', 'Completed']];
 
 function MyJobs() {
   const toast = useToast();
-  const state = useApi('/pickups?status=assigned,on_the_way&limit=100', { refreshMs: 30000 });
+  const state = useApi('/pickups?status=assigned,on_the_way&limit=100', { refreshMs: 30000, live: true });
   const [busy, setBusy] = useState(null);
   const [completing, setCompleting] = useState(null);
 
@@ -80,7 +80,7 @@ function DoneJobs() {
 export default function CollectorJobs() {
   const initial = new URLSearchParams(useSearch()).get('tab');
   const [tab, setTab] = useState(TABS.some(([k]) => k === initial) ? initial : 'mine');
-  return <Shell title="Jobs" subtitle="Your stops, nearby requests and history." actions={<AvailabilityToggle />}>
+  return <Shell title="Jobs" subtitle="Your stops, nearby requests and history." actions={<><JobAlertsButton /><AvailabilityToggle /></>}>
     <PageHead eyebrow="Collector jobs" title="Keep the handoff moving." text="Start the trip when you set off — the customer sees you coming. Complete it once the waste is loaded." />
     <div className="panel">
       <div className="filter-bar">{TABS.map(([key, label]) => <button key={key} className={`btn btn-sm ${tab === key ? 'btn-primary' : 'btn-quiet'}`} onClick={() => setTab(key)} data-testid={`tab-${key}`}>{label}</button>)}</div>

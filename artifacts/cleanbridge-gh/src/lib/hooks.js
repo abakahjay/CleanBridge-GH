@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from './api.js';
 
 // Loads `path` from the API. Pass null to skip. `refreshMs` re-polls quietly.
-export function useApi(path, { refreshMs = 0 } = {}) {
+export function useApi(path, { refreshMs = 0, live = false } = {}) {
   const [state, setState] = useState({ data: null, error: null, loading: Boolean(path) });
   const pathRef = useRef(path);
   pathRef.current = path;
@@ -25,6 +25,14 @@ export function useApi(path, { refreshMs = 0 } = {}) {
   }, [path, load]);
 
   useInterval(() => load({ quiet: true }), path && refreshMs ? refreshMs : null);
+
+  // Refresh instantly when the server pushes a live update (see lib/live.js).
+  useEffect(() => {
+    if (!live) return undefined;
+    const onLive = () => load({ quiet: true });
+    window.addEventListener('cb:live', onLive);
+    return () => window.removeEventListener('cb:live', onLive);
+  }, [live, load]);
 
   const setData = useCallback((updater) => setState((s) => ({ ...s, data: typeof updater === 'function' ? updater(s.data) : updater })), []);
   return { ...state, reload: load, setData };

@@ -5,7 +5,7 @@ import { Async, InfoRow, PageHead, Spinner, StatCard } from '../../components/ui
 import { api } from '../../lib/api.js';
 import { useApi } from '../../lib/hooks.js';
 import { useToast } from '../../lib/toast.jsx';
-import { WASTE_TYPES } from '../../lib/ghana.js';
+import { VEHICLE_TYPES, WASTE_TYPES } from '../../lib/ghana.js';
 import { cedi, formatDate, isoDay } from '../../lib/format.js';
 
 const num = (v) => (v === '' ? NaN : Number(v));
@@ -83,7 +83,7 @@ export function AdminPricing() {
 
   useEffect(() => {
     if (!state.data) return;
-    setPricing({ ...state.data.pricing, wasteTypeFees: { ...state.data.pricing.wasteTypeFees } });
+    setPricing({ ...state.data.pricing, wasteTypeFees: { ...state.data.pricing.wasteTypeFees }, vehicleFees: { ...state.data.vehicleFees }, tax: { ...state.data.tax } });
     setPayouts({ ...state.data.payouts });
   }, [state.data]);
 
@@ -92,9 +92,11 @@ export function AdminPricing() {
     if (!pricing) return null;
     const p = Object.fromEntries(Object.entries(pricing).map(([k, v]) => [k, typeof v === 'object' ? v : Number(v) || 0]));
     const subtotal = p.baseFee + 6 * p.distanceFeePerKm + 3 * p.perBagFee + (Number(p.wasteTypeFees['Household mix']) || 0);
-    const total = Math.max(subtotal, p.minimumFee);
+    const net = Math.max(subtotal, p.minimumFee);
+    const t = p.tax || {};
+    const taxPct = t.enabled ? ['vatPct', 'nhilPct', 'getFundPct', 'covidLevyPct'].reduce((sum, k) => sum + (Number(t[k]) || 0), 0) : 0;
     const share = (Number(payouts?.collectorSharePct) || 0) / 100;
-    return { total, collector: total * share, platform: total * (1 - share) };
+    return { total: net * (1 + taxPct / 100), collector: net * share, platform: net * (1 - share), tax: net * taxPct / 100 };
   }, [pricing, payouts]);
 
   const savePricing = async (e) => {
@@ -103,6 +105,8 @@ export function AdminPricing() {
     try {
       const body = Object.fromEntries(PRICING_FIELDS.map(([k]) => [k, num(pricing[k])]));
       body.wasteTypeFees = Object.fromEntries(Object.entries(pricing.wasteTypeFees).map(([k, v]) => [k, num(v)]));
+      body.vehicleFees = Object.fromEntries(Object.entries(pricing.vehicleFees).map(([k, v]) => [k, num(v)]));
+      body.tax = { enabled: Boolean(pricing.tax.enabled), vatPct: num(pricing.tax.vatPct), nhilPct: num(pricing.tax.nhilPct), getFundPct: num(pricing.tax.getFundPct), covidLevyPct: num(pricing.tax.covidLevyPct) };
       state.setData(await api.put('/settings/pricing', body));
       toast('Pricing saved. New bookings use it immediately.');
     } catch (err) { toast(err.message, 'error'); } finally { setSaving(''); }
@@ -120,7 +124,7 @@ export function AdminPricing() {
     <PageHead eyebrow="Money in, money out" title="Pricing & collector pay" text="All amounts in Ghana cedis. Customers see the full breakdown before booking." />
     <Async state={state}>{() => pricing && payouts && <>
       {example && <div className="grid-3" style={{ marginBottom: '1rem' }}>
-        <StatCard label="Example: 3 bags, 6 km, weekday" icon={CircleDollarSign} value={cedi(example.total)} foot="What the customer pays" />
+        <StatCard label="Example: 3 bags, 6 km, weekday" icon={CircleDollarSign} value={cedi(example.total)} foot={`What the customer pays · incl. ${cedi(example.tax)} tax`} />
         <StatCard label="Collector receives" icon={HandCoins} value={cedi(example.collector)} foot={`${payouts.collectorSharePct}% share`} />
         <StatCard label="CleanBridge keeps" value={cedi(example.platform)} foot="Platform fee" />
       </div>}
@@ -136,6 +140,18 @@ export function AdminPricing() {
             <label htmlFor={`w-${value}`} className="data-main"><strong>{value}</strong></label>
             <div className="money-input"><span>GH₵</span><input id={`w-${value}`} type="number" min="0" step="0.5" value={pricing.wasteTypeFees[value] ?? 0} onChange={(e) => setPricing((p) => ({ ...p, wasteTypeFees: { ...p.wasteTypeFees, [value]: e.target.value } }))} /></div>
           </div>)}
+          <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Vehicle charges</h3></div>
+          {VEHICLE_TYPES.map((v) => <div className="data-row price-row" key={v}>
+            <label htmlFor={`v-${v}`} className="data-main"><strong>{v}</strong></label>
+            <div className="money-input"><span>GH₵</span><input id={`v-${v}`} type="number" min="0" step="0.5" value={pricing.vehicleFees[v] ?? 0} onChange={(e) => setPricing((p) => ({ ...p, vehicleFees: { ...p.vehicleFees, [v]: e.target.value } }))} /></div>
+          </div>)}
+          <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Ghana taxes</h3></div>
+          <label className={`toggle-row ${pricing.tax.enabled ? 'on' : ''}`}><input type="checkbox" checked={Boolean(pricing.tax.enabled)} onChange={(e) => setPricing((p) => ({ ...p, tax: { ...p.tax, enabled: e.target.checked } }))} /> Charge VAT and levies (turn off if not VAT-registered)</label>
+          {[['vatPct', 'VAT'], ['nhilPct', 'NHIL'], ['getFundPct', 'GETFund levy'], ['covidLevyPct', 'COVID-19 levy']].map(([k, label]) => <div className="data-row price-row" key={k}>
+            <label htmlFor={`t-${k}`} className="data-main"><strong>{label}</strong><span>% of the subtotal</span></label>
+            <div className="money-input"><input id={`t-${k}`} type="number" min="0" max="100" step="0.5" value={pricing.tax[k]} disabled={!pricing.tax.enabled} onChange={(e) => setPricing((p) => ({ ...p, tax: { ...p.tax, [k]: e.target.value } }))} /><span>%</span></div>
+          </div>)}
+          <p className="muted" style={{ fontSize: '.7rem', lineHeight: 1.5 }}>Defaults follow Ghana’s VAT regime from January 2026 (VAT 15% + NHIL 2.5% + GETFund 2.5%; COVID-19 levy abolished). Confirm current rates with GRA.</p>
           <button className="btn btn-primary" style={{ marginTop: '1rem' }} disabled={saving === 'pricing'} data-testid="button-save-pricing">{saving === 'pricing' ? <Spinner size={15} /> : <Save size={15} />} Save pricing</button>
         </form>
         <form className="panel panel-pad" onSubmit={savePayouts} style={{ alignSelf: 'start' }}>

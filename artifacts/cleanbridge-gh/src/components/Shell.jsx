@@ -7,6 +7,8 @@ import {
 import { api } from '../lib/api.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { useApi } from '../lib/hooks.js';
+import { playChime, showSystemNotification, useLiveUpdates } from '../lib/live.js';
+import { useToast } from '../lib/toast.jsx';
 import { Avatar, Logo, ThemeToggle, WhatsAppIcon } from './ui.jsx';
 import { whatsappLink } from '../lib/contact.js';
 
@@ -95,7 +97,19 @@ function ProfileMenu({ user }) {
 export default function Shell({ title, subtitle, children, actions }) {
   const { user } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const notifications = useApi('/notifications?unread=true', { refreshMs: 60000 });
+  const notifications = useApi('/notifications?unread=true', { refreshMs: 60000, live: true });
+  const toast = useToast();
+  const [, go] = useLocation();
+
+  useLiveUpdates(Boolean(user), (n) => {
+    const newJob = n.kind === 'new_request';
+    toast(`${n.title} — ${n.message}`, newJob ? 'info' : 'success');
+    if (newJob) playChime();
+    if (document.hidden || newJob) {
+      const url = newJob ? '/collector/jobs?tab=available' : n.pickupId ? `/pickups/${n.pickupId}` : '/notifications';
+      showSystemNotification(n, url, () => go(url));
+    }
+  });
   const sharing = useCollectorLocationSharing(user);
   const unread = notifications.data?.unreadCount || 0;
   const [location] = useLocation();

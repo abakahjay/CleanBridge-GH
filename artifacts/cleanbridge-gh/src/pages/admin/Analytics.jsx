@@ -23,7 +23,7 @@ export default function AdminAnalytics() {
         <div className="grid-4">
           <StatCard label="Gross revenue" icon={CircleDollarSign} value={cediShort(a.money.grossRevenue)} foot="Completed pickups" />
           <StatCard label="Paid to collectors" icon={HandCoins} value={cediShort(a.money.collectorEarnings)} foot={a.money.grossRevenue ? `${Math.round((a.money.collectorEarnings / a.money.grossRevenue) * 100)}% of revenue` : '—'} />
-          <StatCard label="Platform revenue" icon={CircleDollarSign} value={cediShort(a.money.platformRevenue)} tone="green" foot={`Fuel est. ${cedi(a.fuel.fuelCost)}`} />
+          <StatCard label="Platform revenue" icon={CircleDollarSign} value={cediShort(a.money.platformRevenue)} tone="green" foot={`Taxes collected ${cedi(a.money.taxCollected || 0)} · fuel est. ${cedi(a.fuel.fuelCost)}`} />
           <StatCard label="Pickups booked" icon={PackageCheck} value={totalPickups} foot={`${a.byStatus.completed || 0} completed · ${a.byStatus.cancelled || 0} cancelled`} />
         </div>
         <div className="grid-2" style={{ marginTop: '1rem' }}>

@@ -8,7 +8,7 @@ import { useToast } from '../lib/toast.jsx';
 import { timeAgo } from '../lib/format.js';
 
 export default function Notifications() {
-  const state = useApi('/notifications');
+  const state = useApi('/notifications', { live: true });
   const toast = useToast();
 
   const markRead = async (id) => {

@@ -31,10 +31,10 @@ export default function AssignModal({ pickup, onClose, onAssigned }) {
     <p className="muted" style={{ fontSize: '.78rem', marginTop: 0 }}>{pickup.area} · {formatDate(pickup.scheduledDate)} {pickup.timeWindow} · {pickup.wasteType}</p>
     <Async state={state}>{({ collectors }) => {
       const ready = collectors
-        .filter((c) => c.isActive && c.vehicle?.verificationStatus === 'verified')
+        .filter((c) => c.isActive && c.vehicle?.verificationStatus === 'verified' && (!pickup.vehicleType || c.vehicle.type === pickup.vehicleType))
         .map((c) => ({ ...c, km: c.location && pickup.location ? Math.round(haversineKm(c.location, pickup.location) * ROAD_FACTOR * 10) / 10 : null }))
         .sort((a, b) => (a.collectorStatus === 'off_duty') - (b.collectorStatus === 'off_duty') || (a.km ?? 1e9) - (b.km ?? 1e9));
-      if (!ready.length) return <p className="muted" style={{ fontSize: '.8rem' }}>No active collectors with a verified vehicle. Verify a vehicle on the Collectors page first.</p>;
+      if (!ready.length) return <p className="muted" style={{ fontSize: '.8rem' }}>No active collectors with a verified {pickup.vehicleType || 'vehicle'}. Verify one on the Collectors page first.</p>;
       return <div className="data-list modal-list">{ready.map((c) => <div className="data-row" key={c.id}>
         <div className="person"><Avatar user={c} size={34} /><div className="data-main"><strong>{c.name}</strong><span>{c.vehicle.make} {c.vehicle.model} · {c.vehicle.registration}{c.km != null ? ` · ${c.km} km from base` : ''}{c.rating ? ` · ★ ${c.rating.toFixed(1)}` : ''}</span></div></div>
         <div className="row-actions"><StatusBadge status={c.collectorStatus} /><button className="btn btn-primary btn-sm" onClick={() => assign(c)} disabled={Boolean(busy)} data-testid={`button-assign-${c.id}`}>{busy === c.id ? <Spinner size={14} /> : <UserCheck size={14} />} Assign</button></div>

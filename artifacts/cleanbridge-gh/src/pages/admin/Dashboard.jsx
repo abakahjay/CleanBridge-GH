@@ -8,7 +8,7 @@ import { cedi, cediShort, formatDate, todayLong } from '../../lib/format.js';
 import AssignModal from './AssignModal.jsx';
 
 export default function AdminDashboard() {
-  const state = useApi('/dashboard/admin', { refreshMs: 60000 });
+  const state = useApi('/dashboard/admin', { refreshMs: 60000, live: true });
   const week = useApi('/dashboard/analytics?days=7');
   const [assigning, setAssigning] = useState(null);
 

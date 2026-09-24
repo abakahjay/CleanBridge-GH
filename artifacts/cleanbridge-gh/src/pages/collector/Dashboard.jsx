@@ -7,6 +7,7 @@ import { api } from '../../lib/api.js';
 import { useAuth } from '../../lib/auth.jsx';
 import { getCurrentPosition, useAction, useApi } from '../../lib/hooks.js';
 import { useToast } from '../../lib/toast.jsx';
+import { notificationsSupported } from '../../lib/live.js';
 import { cedi, firstName, formatDate, greeting, plural, todayLong } from '../../lib/format.js';
 
 export function useHere() {
@@ -33,7 +34,7 @@ export function AvailabilityToggle() {
 export function NearbyRequests({ limit = 5, onAccepted }) {
   const here = useHere();
   const toast = useToast();
-  const state = useApi(`/pickups/available${here ? `?lat=${here.lat}&lng=${here.lng}` : ''}`, { refreshMs: 30000 });
+  const state = useApi(`/pickups/available${here ? `?lat=${here.lat}&lng=${here.lng}` : ''}`, { refreshMs: 30000, live: true });
   const [pendingId, setPendingId] = useState(null);
 
   const accept = async (p) => {
@@ -56,6 +57,7 @@ export function NearbyRequests({ limit = 5, onAccepted }) {
     : <div className="data-list">{pickups.slice(0, limit).map((p) => <div className="data-row" key={p.id} data-testid={`row-nearby-request-${p.code}`}>
       <div className="data-main">
         <strong>{p.area} · {p.wasteType}{p.urgent && <span className="badge badge-orange" style={{ marginLeft: '.4rem' }}>Express</span>}</strong>
+        {p.vehicleType && <span>Needs: {p.vehicleType}</span>}
         <span>{plural(p.bags, 'bag')} · {formatDate(p.scheduledDate)} {p.timeWindow}{p.distanceFromYouKm != null ? ` · ${p.distanceFromYouKm} km away` : ''}</span>
         <span>You earn <b>{cedi(p.estimatedEarning)}</b> · {p.paymentMethod === 'cash' ? `collect ${cedi(p.estimatedPrice)} cash` : 'paid by MoMo'}</span>
       </div>
@@ -64,11 +66,25 @@ export function NearbyRequests({ limit = 5, onAccepted }) {
   </Async>;
 }
 
+// Ask once for phone/desktop notifications so new jobs pop up even when the
+// app is in the background.
+export function JobAlertsButton() {
+  const toast = useToast();
+  const [perm, setPerm] = useState(notificationsSupported() ? Notification.permission : 'unsupported');
+  if (perm === 'granted' || perm === 'unsupported') return null;
+  const enable = async () => {
+    const result = await Notification.requestPermission();
+    setPerm(result);
+    toast(result === 'granted' ? 'Job alerts are on. New requests will pop up instantly.' : 'Alerts are blocked — allow notifications for this site in your browser settings.', result === 'granted' ? 'success' : 'error');
+  };
+  return <button className="btn btn-outline" onClick={enable} disabled={perm === 'denied'} data-testid="button-enable-alerts">🔔 {perm === 'denied' ? 'Alerts blocked' : 'Turn on job alerts'}</button>;
+}
+
 export default function CollectorDashboard() {
   const { user } = useAuth();
-  const state = useApi('/dashboard/collector', { refreshMs: 30000 });
+  const state = useApi('/dashboard/collector', { refreshMs: 30000, live: true });
 
-  return <Shell title={`${greeting()}, ${firstName(user.name)}`} subtitle={todayLong()} actions={<AvailabilityToggle />}>
+  return <Shell title={`${greeting()}, ${firstName(user.name)}`} subtitle={todayLong()} actions={<><JobAlertsButton /><AvailabilityToggle /></>}>
     <Async state={state}>{(d) => <>
       {(!d.vehicle || d.vehicle.verificationStatus !== 'verified') && <div className="form-alert warn" style={{ marginBottom: '1rem' }}>
         <CircleAlert size={16} /><span>{!d.vehicle ? 'Register your vehicle to start accepting jobs.' : d.vehicle.verificationStatus === 'rejected' ? 'Your vehicle was not approved. Update the details and resubmit.' : 'Your vehicle is awaiting verification by operations. You can accept jobs once it is verified.'} <Link href="/collector/vehicle">Open vehicle page →</Link></span>

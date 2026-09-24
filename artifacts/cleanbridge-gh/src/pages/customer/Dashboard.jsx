@@ -32,7 +32,7 @@ function NextPickupCard({ pickup }) {
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
-  const state = useApi('/dashboard/customer', { refreshMs: 30000 });
+  const state = useApi('/dashboard/customer', { refreshMs: 30000, live: true });
 
   return <Shell title={`${greeting()}, ${firstName(user.name)}`} subtitle={`${todayLong()}${user.area ? ` · ${user.area}` : ''}`}>
     <PageHead eyebrow="Your household" title="Keep the next pickup simple." text="Book, track and pay for collections in one place.">

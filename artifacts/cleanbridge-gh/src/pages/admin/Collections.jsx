@@ -48,7 +48,7 @@ export default function AdminCollections() {
           <div className="table-wrap"><table className="table">
             <thead><tr><th>Pickup</th><th>Customer</th><th>Area</th><th>Schedule</th><th>Collector</th><th>Status</th><th>Payment</th><th>Value</th><th /></tr></thead>
             <tbody>{pickups.map((p) => <tr key={p.id} data-testid={`row-collection-${p.code}`}>
-              <td><Link href={`/pickups/${p.id}`}><strong>{p.code}</strong></Link><div className="cell-sub">{p.wasteType} · {plural(p.bags, 'bag')}</div></td>
+              <td><Link href={`/pickups/${p.id}`}><strong>{p.code}</strong></Link><div className="cell-sub">{p.wasteType} · {plural(p.bags, 'bag')}</div>{p.vehicleType && <div className="cell-sub">{p.vehicleType}</div>}</td>
               <td>{p.customerName}</td>
               <td>{p.area}<div className="cell-sub">{p.hubName} · {p.distanceKm} km</div></td>
               <td>{formatDate(p.scheduledDate)}<div className="cell-sub">{p.timeWindow}</div></td>
