@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { Redirect, useLocation } from 'wouter';
 import { api, setUnauthorizedHandler, tokenStore } from './api.js';
 import { FullPageLoader } from '../components/ui.jsx';
+import { syncPushSubscription } from './push.js';
 
 const AuthContext = createContext(null);
 
@@ -21,6 +22,7 @@ export function AuthProvider({ children }) {
     try {
       const { user: me } = await api.get('/auth/me');
       setUser(me);
+      syncPushSubscription();
       return me;
     } catch (error) {
       if (error.status === 401) logout();

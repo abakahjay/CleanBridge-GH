@@ -3,7 +3,7 @@
 // - Hashed build assets (/assets/*) and icons: cache first (they never change).
 // - Everything else, including the API and map tiles (other origins), is not
 //   touched - prices, pickups and payments must always be live.
-const VERSION = 'cb-v2';
+const VERSION = 'cb-v3';
 const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.svg', '/icons/icon-192.png', '/offline.html'];
 
 self.addEventListener('install', (event) => {
@@ -46,6 +46,26 @@ self.addEventListener('fetch', (event) => {
       }))
     );
   }
+});
+
+// Web Push from FullBackendd (utils/push.js): { title, body, url, tag }.
+// Skipped while the app is open and visible - it shows the update itself.
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch { data = { body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((wins) => {
+      if (data.tag !== 'test' && wins.some((w) => w.focused && w.visibilityState === 'visible')) return undefined;
+      return self.registration.showNotification(data.title || 'CleanBridge GH', {
+        body: data.body || '',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-96.png',
+        tag: data.tag,
+        renotify: Boolean(data.tag),
+        data: { url: data.url || '/notifications' },
+      });
+    })
+  );
 });
 
 // Tapping a job alert / update notification opens (or focuses) the app.

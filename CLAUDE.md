@@ -35,3 +35,11 @@ There is no test runner, linter or typecheck. The source is plain JavaScript (`.
 - Password reset: `pages/PasswordReset.jsx` (`/forgot-password`, `/reset-password?token=&email=`) using the backend's shared reset flow; the emailed link comes back to this app because the request sends `redirect_uri`.
 - Installable app: `public/manifest.webmanifest`, `public/sw.js` (network-first pages, cache-first hashed assets, never the API), `/download` serves the Android APK from `public/downloads/`; `public/.well-known/assetlinks.json` ties it to the `com.cleanbridgegh.app` package.
 - Styling: tokens in `index.css` (`:root` / `:root[data-theme='dark']`); component classes for the live app in `app.css`. Use existing classes and `hsl(var(--token))`, not hard-coded colours. Keep adding `data-testid` to interactive elements.
+
+## Device notifications (Web Push)
+
+- `public/sw.js` has a `push` handler; bump `VERSION` whenever you change it.
+- `src/lib/push.js` subscribes through FullBackendd `/api/v1/push/cleanbridge/*`, which uses the CleanBridge JWT. It also sets `localStorage['cleanbridge-push-on']`. While that flag is set, `live.js` `showSystemNotification` does nothing, so a device doesn't get alerted twice.
+- `components/PushToggle.jsx` is the "Phone notifications" panel on Profile.
+- `lib/auth.jsx` relinks the device after `/auth/me`.
+- Every backend `notify()` is also pushed.

@@ -4,6 +4,7 @@ import { Camera, CircleAlert, KeyRound, Mail, MapPinned, Save, Trash2, WalletCar
 import Shell from '../components/Shell.jsx';
 import LocationPicker from '../components/LocationPicker.jsx';
 import DeleteAccount from '../components/DeleteAccount.jsx';
+import PushToggle from '../components/PushToggle.jsx';
 import { Avatar, Spinner } from '../components/ui.jsx';
 import { api, request } from '../lib/api.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
@@ -177,6 +178,8 @@ export default function Profile() {
         </label>
         <small className="muted" style={{ display: 'block', marginTop: '.5rem', fontSize: '.7rem' }}>Sent to {user.email}. You’ll always see updates in the app.</small>
       </div>
+
+      <PushToggle role={user.role} />
 
       <div className="panel panel-pad">
         <div className="mini-title"><h3>{user.hasPassword ? 'Change password' : 'Set a password'}</h3><KeyRound size={17} className="muted" /></div>

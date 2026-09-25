@@ -1,3 +1,4 @@
+import { pushOnHere } from './push.js';
 import { useEffect, useRef } from 'react';
 import { API_URL, tokenStore } from './api.js';
 
@@ -46,6 +47,7 @@ export const notificationsSupported = () => typeof window !== 'undefined' && 'No
 // System notification (phone/desktop), shown when the user allowed alerts.
 export function showSystemNotification(n, url, onClick) {
   if (!notificationsSupported() || Notification.permission !== 'granted') return;
+  if (pushOnHere()) return; // push notifications already reach this device (lib/push.js)
   try {
     const note = new Notification(n.title, { body: n.message, icon: '/icons/icon-192.png', badge: '/icons/icon-96.png', tag: n.id });
     note.onclick = () => { window.focus(); onClick?.(); note.close(); };
