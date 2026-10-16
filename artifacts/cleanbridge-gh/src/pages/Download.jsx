@@ -12,7 +12,7 @@ export const PUBLIC_SITE = 'https://cleanbridge-gh.onrender.com';
 // Update sizes and versions here when a new installer is released.
 const APK = { href: '/downloads/CleanBridge-GH.apk', size: '1.2 MB', version: '1.0.0' };
 const EXE = {
-  href: 'https://github.com/abakahjayy/CleanBridge-GH/releases/latest/download/CleanBridge-GH-Setup.exe',
+  href: 'https://github.com/abakahjay/CleanBridge-GH/releases/latest/download/CleanBridge-GH-Setup.exe',
   size: '78 MB',
   version: '1.0.0'
 };
