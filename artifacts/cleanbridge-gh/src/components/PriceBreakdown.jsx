@@ -3,31 +3,41 @@ import { cedi } from '../lib/format.js';
 
 export const FEE_LABELS = {
   baseFee: 'Base fee',
+  serviceFee: 'Service & booking fee',
   distanceFee: 'Distance from hub',
   quantityFee: 'Quantity',
   wasteTypeFee: 'Waste type',
   vehicleFee: 'Vehicle',
   urgencyFee: 'Express pickup',
   weekendFee: 'Weekend',
+  offHoursFee: 'Early / evening window',
+  carryFee: 'Carry-down from upper floors',
+  binWashFee: 'Bin wash & sanitise',
+  planDiscount: 'Plan discount',
   minimumTopUp: 'Minimum charge top-up'
 };
 
-const Row = ({ label, value, strong, muted }) => <div className={`pb-row ${strong ? 'strong' : ''} ${muted ? 'muted' : ''}`}><span>{label}</span><span>{value}</span></div>;
+const Row = ({ label, value, strong, muted, discount }) => <div className={`pb-row ${strong ? 'strong' : ''} ${muted ? 'muted' : ''} ${discount ? 'discount' : ''}`}><span>{label}</span><span>{value}</span></div>;
 
 /**
  * Itemised price: fees → subtotal → Ghana taxes → total, then the split.
  * Works with a quote ({ breakdown, subtotal, taxes, taxTotal, total, split })
  * or a saved pickup ({ priceBreakdown, subtotal, taxes, taxAmount, estimatedPrice }).
  */
-export default function PriceBreakdown({ breakdown, subtotal, taxes = [], taxTotal, total, split, vehicleType, sharePct, showSplit = true }) {
-  const fees = Object.entries(breakdown || {}).filter(([, v]) => v > 0);
+export default function PriceBreakdown({ breakdown, subtotal, taxes = [], taxTotal, total, split, vehicleType, sharePct, discountPct, showSplit = true }) {
+  const fees = Object.entries(breakdown || {}).filter(([, v]) => v !== 0 && v != null);
+  const feeLabel = (k) => {
+    if (k === 'vehicleFee' && vehicleType) return `Vehicle · ${vehicleType}`;
+    if (k === 'planDiscount' && discountPct) return `Plan discount (${discountPct}%)`;
+    return FEE_LABELS[k] || k;
+  };
   const net = subtotal ?? total;
   const tax = taxTotal ?? taxes.reduce((s, t) => s + (t.amount || 0), 0);
   const collectorShare = split?.collector ?? (sharePct != null ? Math.round(net * sharePct) / 100 : null);
   const platform = split?.platform ?? (collectorShare != null ? Math.round((net - collectorShare) * 100) / 100 : null);
 
   return <div className="price-breakdown">
-    {fees.map(([k, v]) => <Row key={k} label={k === 'vehicleFee' && vehicleType ? `Vehicle · ${vehicleType}` : FEE_LABELS[k] || k} value={cedi(v)} />)}
+    {fees.map(([k, v]) => <Row key={k} label={feeLabel(k)} value={cedi(v)} discount={v < 0} />)}
     <Row label="Subtotal" value={cedi(net)} strong />
     {taxes.map((t) => <Row key={t.code} label={`${t.label} (${t.pct}%)`} value={cedi(t.amount)} muted />)}
     {taxes.length === 0 && <Row label="Taxes" value="Not charged" muted />}

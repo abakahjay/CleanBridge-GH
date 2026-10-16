@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'wouter';
 import {
   ArrowLeft, BarChart3, Bell, CircleDollarSign, Download, Fuel, HandCoins, LayoutDashboard, ListFilter, LogOut, Map,
-  Megaphone, Menu, PackageCheck, Plus, Radio, Route as RouteIcon, ShieldCheck, Truck, UserRound, UsersRound, WalletCards, X
+  Layers, Megaphone, Menu, PackageCheck, Plus, Radio, Repeat, Route as RouteIcon, ShieldCheck, Truck, UserRound, UsersRound, WalletCards, X
 } from 'lucide-react';
 import { api } from '../lib/api.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
@@ -10,19 +10,21 @@ import { useApi } from '../lib/hooks.js';
 import { playChime, showSystemNotification, useLiveUpdates } from '../lib/live.js';
 import { useToast } from '../lib/toast.jsx';
 import { Avatar, Logo, ThemeToggle, WhatsAppIcon } from './ui.jsx';
+import { isStandalone } from './InstallApp.jsx';
 import { whatsappLink } from '../lib/contact.js';
 
 const NAV = {
   customer: [
     ['Overview', '/dashboard', LayoutDashboard], ['Request pickup', '/pickup', Plus], ['My pickups', '/pickups', PackageCheck],
-    ['Live map', '/map', Map], ['Notifications', '/notifications', Bell], ['Profile', '/profile', UserRound]
+    ['My plans', '/plans', Repeat], ['Live map', '/map', Map], ['Notifications', '/notifications', Bell], ['Profile', '/profile', UserRound]
   ],
   collector: [
     ['Overview', '/collector/dashboard', LayoutDashboard], ['Jobs', '/collector/jobs', ListFilter], ['Today’s route', '/collector/route', RouteIcon],
     ['Earnings & payouts', '/collector/earnings', WalletCards], ['Vehicle', '/collector/vehicle', Truck], ['Notifications', '/notifications', Bell], ['Profile', '/profile', UserRound]
   ],
   admin: [
-    ['Command centre', '/admin/dashboard', LayoutDashboard], ['Collections', '/admin/collections', PackageCheck], ['Customers', '/admin/customers', UsersRound],
+    ['Command centre', '/admin/dashboard', LayoutDashboard], ['Collections', '/admin/collections', PackageCheck],
+    ['Area dispatch', '/admin/dispatch', Layers], ['Recurring plans', '/admin/plans', Repeat], ['Customers', '/admin/customers', UsersRound],
     ['Collectors', '/admin/collectors', UserRound], ['Payouts', '/admin/payouts', HandCoins], ['Routes', '/admin/routes', RouteIcon],
     ['Network map', '/admin/map', Map], ['Fuel costs', '/admin/fuel', Fuel], ['Pricing', '/admin/pricing', CircleDollarSign],
     ['Analytics', '/admin/analytics', BarChart3], ['Announcements', '/admin/broadcast', Megaphone], ['Profile', '/profile', UserRound]
@@ -91,7 +93,7 @@ function ProfileMenu({ user }) {
     <button className="avatar-btn" onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open} data-testid="button-profile-menu"><Avatar user={user} size={36} /></button>
     {open && <div className="menu panel" role="menu">
       <div className="menu-head"><Avatar user={user} size={40} /><div><strong>{user.name}</strong><span>{user.email}</span><RoleBadge role={user.role} /></div></div>
-      <Link href="/download" className="menu-item" onClick={() => setOpen(false)} role="menuitem"><Download size={15} /> Get the app</Link>
+      {!isStandalone() && <Link href="/download" className="menu-item" onClick={() => setOpen(false)} role="menuitem"><Download size={15} /> Get the app</Link>}
       <Link href="/profile" className="menu-item" onClick={() => setOpen(false)} role="menuitem"><UserRound size={15} /> Profile & settings</Link>
       <a href={whatsappLink(`Hello CleanBridge GH, this is ${user.name} (${user.role}). I need help with`)} target="_blank" rel="noopener noreferrer" className="menu-item" role="menuitem"><WhatsAppIcon size={15} /> Help on WhatsApp</a>
       <button className="menu-item" role="menuitem" onClick={() => { logout(); navigate('/login'); }} data-testid="button-logout"><LogOut size={15} /> Log out</button>

@@ -43,6 +43,7 @@ catalog:
   wouter: ^3.3.5
 
 autoInstallPeers: false
+strictPeerDependencies: false
 
 onlyBuiltDependencies:
   - esbuild

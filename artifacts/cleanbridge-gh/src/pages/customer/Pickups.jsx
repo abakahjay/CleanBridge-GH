@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'wouter';
-import { PackageCheck, Plus } from 'lucide-react';
+import { PackageCheck, Plus, Repeat } from 'lucide-react';
 import Shell from '../../components/Shell.jsx';
 import { Async, EmptyState, PageHead, StatusBadge } from '../../components/ui.jsx';
 import { useApi } from '../../lib/hooks.js';
@@ -25,7 +25,7 @@ export default function Pickups() {
         : <div className="table-wrap"><table className="table">
           <thead><tr><th>Pickup</th><th>Area</th><th>Schedule</th><th>Collector</th><th>Status</th><th>Payment</th><th>Amount</th><th /></tr></thead>
           <tbody>{pickups.map((p) => <tr key={p.id} data-testid={`row-pickup-${p.code}`}>
-            <td><strong>{p.code}</strong><div className="cell-sub">{p.wasteType} · {plural(p.bags, 'bag')}</div></td>
+            <td><strong>{p.code}</strong>{p.frequency && p.frequency !== 'once' && <span className="badge badge-green plan-tag"><Repeat size={10} /> {p.frequency}</span>}<div className="cell-sub">{p.wasteType} · {plural(p.bags, 'bag')}</div></td>
             <td>{p.area}</td>
             <td>{formatDate(p.scheduledDate)}<div className="cell-sub">{p.timeWindow}</div></td>
             <td>{p.collectorName || <span className="muted">Not yet assigned</span>}</td>

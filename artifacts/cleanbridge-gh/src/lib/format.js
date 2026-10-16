@@ -48,17 +48,31 @@ export const STATUS_LABELS = {
   pending: 'Pending', verified: 'Verified', rejected: 'Rejected',
   paid: 'Paid', unpaid: 'Unpaid', refunded: 'Refunded',
   available: 'Available', on_route: 'On route', off_duty: 'Off duty',
-  active: 'Active', suspended: 'Suspended'
+  active: 'Active', suspended: 'Suspended', paused: 'Paused'
 };
 
 const TONES = {
   completed: 'green', verified: 'green', paid: 'green', available: 'green', active: 'green',
   on_the_way: 'yellow', in_progress: 'yellow', on_route: 'yellow', assigned: 'yellow',
   requested: 'orange', pending: 'orange', planned: 'orange', unpaid: 'orange',
-  cancelled: 'slate', rejected: 'red', refunded: 'slate', off_duty: 'slate', suspended: 'red'
+  cancelled: 'slate', rejected: 'red', refunded: 'slate', off_duty: 'slate', suspended: 'red', paused: 'yellow'
 };
 
 export const statusLabel = (status) => STATUS_LABELS[status] || status;
 export const statusTone = (status) => TONES[status] || 'slate';
 
-export const plural = (n, word, pluralWord = `${word}s`) => `${n} ${n === 1 ? word : pluralWord}`;
+const ordinal = (n) => {
+  const s = n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] || 'th');
+  return `${n}${s}`;
+};
+
+// "Every Saturday" / "On the 17th of every month" for a plan whose first
+// visit is `date` (YYYY-MM-DD or a Date). Monthly plans cap at the 28th.
+export const planSchedule = (frequency, date) => {
+  const d = new Date(typeof date === 'string' && date.length === 10 ? `${date}T12:00:00Z` : date);
+  if (frequency === 'weekly') return `Every ${d.toLocaleDateString('en-GB', { weekday: 'long', timeZone: TZ })}`;
+  if (frequency === 'monthly') return `On the ${ordinal(Math.min(Number(d.toLocaleDateString('en-GB', { day: 'numeric', timeZone: TZ })), 28))} of every month`;
+  return 'One-off';
+};
+
+export const plural =(n, word, pluralWord = `${word}s`) => `${n} ${n === 1 ? word : pluralWord}`;

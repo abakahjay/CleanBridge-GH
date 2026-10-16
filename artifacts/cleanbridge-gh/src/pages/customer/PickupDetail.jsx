@@ -92,6 +92,8 @@ export default function PickupDetail() {
             {p.gateNote && <InfoRow label="Gate note">{p.gateNote}</InfoRow>}
             <InfoRow label="When">{formatDate(p.scheduledDate)} · {p.timeWindow}</InfoRow>
             {p.vehicleType && <InfoRow label="Vehicle">{p.vehicleType}</InfoRow>}
+            {p.frequency && p.frequency !== 'once' && <InfoRow label="Plan">{p.frequency === 'weekly' ? 'Weekly' : 'Monthly'} plan{user.role === 'customer' ? <> · <Link href="/plans">Manage</Link></> : null}</InfoRow>}
+            {(p.floors > 0 || p.binWash) && <InfoRow label="Extras">{[p.floors > 0 && `Carry down ${p.floors} floor${p.floors > 1 ? 's' : ''}`, p.binWash && 'Bin wash & sanitise'].filter(Boolean).join(' · ')}</InfoRow>}
             {p.collectorPhone && user.role === 'customer' && <InfoRow label="Collector">{p.collectorName} · {formatPhone(p.collectorPhone)}</InfoRow>}
             {user.role !== 'customer' && <InfoRow label="Customer">{p.customerName} · {formatPhone(p.customerPhone)}</InfoRow>}
           </div>

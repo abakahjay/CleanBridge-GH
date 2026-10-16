@@ -21,6 +21,22 @@ export const WASTE_TYPES = [
 
 export const TIME_WINDOWS = ['06:00 – 08:00', '08:00 – 10:00', '10:00 – 12:00', '12:00 – 14:00', '14:00 – 16:00', '16:00 – 18:00'];
 
+// Early (06:00) and evening (16:00) windows carry the off-hours fee.
+export const isOffHoursWindow = (w) => /^(06|16|17|18|19)/.test(String(w || ''));
+
+// How often a household wants collection. Recurring plans get a discount
+// (set by admins on the Pricing page) and book each visit automatically.
+export const FREQUENCIES = [
+  { value: 'once', label: 'Just once', hint: 'A single pickup' },
+  { value: 'weekly', label: 'Every week', hint: 'Same day each week' },
+  { value: 'monthly', label: 'Every month', hint: 'Same date each month' }
+];
+
+// Bags a vehicle carries (standard 50 L bag). Mirrors VEHICLE_INFO on the backend.
+export const VEHICLE_CAPACITY = {
+  'Motor tricycle (Aboboyaa)': 8, 'Mini truck': 20, 'Light truck': 45, 'Tipper truck': 120, 'Compactor truck': 300
+};
+
 export const VEHICLE_TYPES = ['Motor tricycle (Aboboyaa)', 'Mini truck', 'Light truck', 'Tipper truck', 'Compactor truck'];
 
 // Typical diesel use, L/100km - a starting point collectors can adjust.

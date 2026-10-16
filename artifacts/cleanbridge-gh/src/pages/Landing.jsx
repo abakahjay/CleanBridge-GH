@@ -3,6 +3,7 @@ import { ArrowRight, CalendarDays, Check, Compass, Download, Eye, Monitor, MapPi
 import { MISSION, VISION } from '../content/about.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { Logo, ThemeToggle, WhatsAppIcon } from '../components/ui.jsx';
+import { isStandalone } from '../components/InstallApp.jsx';
 import { AUTHOR_NAME, PORTFOLIO_URL, WHATSAPP_DISPLAY, whatsappLink } from '../lib/contact.js';
 
 const AREAS = ['Accra', 'Tema', 'Kasoa', 'Madina', 'Kumasi', 'Takoradi', 'Cape Coast', 'Koforidua', 'Ho', 'Sunyani', 'Tamale'];
@@ -13,7 +14,7 @@ function PublicNav() {
     <Link href="/" data-testid="link-public-logo"><Logo /></Link>
     <div className="nav-links"><a href="#how-it-works">How it works</a><a href="#for-collectors">For collectors</a><a href="#areas">Areas we serve</a><Link href="/about">About</Link><a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-portfolio">Portfolio</a></div>
     <div style={{ display: 'flex', alignItems: 'center', gap: '.5rem' }}>
-      <Link className="btn btn-ghost on-dark btn-sm nav-install" href="/download" data-testid="link-get-app"><Download size={14} /> Get the app</Link>
+      {!isStandalone() && <Link className="btn btn-ghost on-dark btn-sm nav-install" href="/download" data-testid="link-get-app"><Download size={14} /> Get the app</Link>}
       <ThemeToggle />
       {user
         ? <Link className="btn btn-secondary btn-sm" href={homeFor(user.role)} data-testid="link-dashboard">Open dashboard <ArrowRight size={14} /></Link>
@@ -34,7 +35,7 @@ export default function Landing() {
           <p className="hero-sub">CleanBridge GH connects homes with trusted collectors across Ghana. Book in a minute, pay with Mobile Money or cash, and follow your collector live on the map.</p>
           <div className="hero-actions">
             <Link className="btn btn-secondary" href="/pickup" data-testid="button-request-pickup">Request a pickup <ArrowRight size={16} /></Link>
-            <Link className="btn btn-ghost on-dark" href="/download" data-testid="button-hero-download"><Smartphone size={16} /> Get the app</Link>
+            {!isStandalone() && <Link className="btn btn-ghost on-dark" href="/download" data-testid="button-hero-download"><Smartphone size={16} /> Get the app</Link>}
           </div>
           <div className="hero-ticks"><span><Check size={13} />Pay with MoMo or cash</span><span><Check size={13} />Prices shown upfront</span><span><Check size={13} />Live tracking</span></div>
         </div>
@@ -82,7 +83,7 @@ export default function Landing() {
       <div style={{ marginTop: '1rem' }}><Link className="btn btn-outline" href="/about" data-testid="link-about">Our values, goals & business plan <ArrowRight size={15} /></Link></div>
     </section>
 
-    <section className="get-app" id="get-app">
+    {!isStandalone() && <section className="get-app" id="get-app">
       <div className="section get-app-inner">
         <div>
           <div className="eyebrow" style={{ color: 'hsl(var(--secondary))' }}>Get the app</div>
@@ -92,10 +93,10 @@ export default function Landing() {
         <div className="get-app-buttons">
           <Link className="store-btn" href="/download" data-testid="link-get-android"><Smartphone size={22} /><span><small>Download for</small>Android</span></Link>
           <Link className="store-btn" href="/download" data-testid="link-get-iphone"><Smartphone size={22} /><span><small>Add to home screen</small>iPhone</span></Link>
-          <Link className="store-btn" href="/download" data-testid="link-get-desktop"><Monitor size={22} /><span><small>Install on</small>Windows & Mac</span></Link>
+          <Link className="store-btn" href="/download" data-testid="link-get-desktop"><Monitor size={22} /><span><small>Download for</small>Windows & Mac</span></Link>
         </div>
       </div>
-    </section>
+    </section>}
 
     <footer className="public-footer"><div className="public-footer-inner">
       <span>© {new Date().getFullYear()} CleanBridge GH · Built by <a href={PORTFOLIO_URL} target="_blank" rel="noopener noreferrer" data-testid="link-footer-portfolio">{AUTHOR_NAME}</a></span>

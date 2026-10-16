@@ -74,6 +74,13 @@ const PRICING_FIELDS = [
   ['minimumFee', 'Minimum charge', 'Small jobs are topped up to this']
 ];
 
+const SERVICE_FIELDS = [
+  ['serviceFee', 'Service & booking fee', 'Every visit: app, MoMo charges, support'],
+  ['offHoursFee', 'Early / evening fee', '06:00 and 16:00 windows'],
+  ['carryFeePerFloor', 'Carry-down / floor', 'Upper floors with no lift'],
+  ['binWashFee', 'Bin wash & sanitise', 'Optional add-on']
+];
+
 export function AdminPricing() {
   const toast = useToast();
   const state = useApi('/settings');
@@ -83,7 +90,7 @@ export function AdminPricing() {
 
   useEffect(() => {
     if (!state.data) return;
-    setPricing({ ...state.data.pricing, wasteTypeFees: { ...state.data.pricing.wasteTypeFees }, vehicleFees: { ...state.data.vehicleFees }, tax: { ...state.data.tax } });
+    setPricing({ ...state.data.pricing, wasteTypeFees: { ...state.data.pricing.wasteTypeFees }, vehicleFees: { ...state.data.vehicleFees }, tax: { ...state.data.tax }, recurring: { ...state.data.recurring } });
     setPayouts({ ...state.data.payouts });
   }, [state.data]);
 
@@ -91,7 +98,7 @@ export function AdminPricing() {
   const example = useMemo(() => {
     if (!pricing) return null;
     const p = Object.fromEntries(Object.entries(pricing).map(([k, v]) => [k, typeof v === 'object' ? v : Number(v) || 0]));
-    const subtotal = p.baseFee + 6 * p.distanceFeePerKm + 3 * p.perBagFee + (Number(p.wasteTypeFees['Household mix']) || 0);
+    const subtotal = p.baseFee + p.serviceFee + 6 * p.distanceFeePerKm + 3 * p.perBagFee + (Number(p.wasteTypeFees['Household mix']) || 0);
     const net = Math.max(subtotal, p.minimumFee);
     const t = p.tax || {};
     const taxPct = t.enabled ? ['vatPct', 'nhilPct', 'getFundPct', 'covidLevyPct'].reduce((sum, k) => sum + (Number(t[k]) || 0), 0) : 0;
@@ -103,7 +110,8 @@ export function AdminPricing() {
     e.preventDefault();
     setSaving('pricing');
     try {
-      const body = Object.fromEntries(PRICING_FIELDS.map(([k]) => [k, num(pricing[k])]));
+      const body = Object.fromEntries([...PRICING_FIELDS, ...SERVICE_FIELDS].map(([k]) => [k, num(pricing[k])]));
+      body.recurring = { weeklyDiscountPct: num(pricing.recurring.weeklyDiscountPct), monthlyDiscountPct: num(pricing.recurring.monthlyDiscountPct) };
       body.wasteTypeFees = Object.fromEntries(Object.entries(pricing.wasteTypeFees).map(([k, v]) => [k, num(v)]));
       body.vehicleFees = Object.fromEntries(Object.entries(pricing.vehicleFees).map(([k, v]) => [k, num(v)]));
       body.tax = { enabled: Boolean(pricing.tax.enabled), vatPct: num(pricing.tax.vatPct), nhilPct: num(pricing.tax.nhilPct), getFundPct: num(pricing.tax.getFundPct), covidLevyPct: num(pricing.tax.covidLevyPct) };
@@ -134,6 +142,16 @@ export function AdminPricing() {
           {PRICING_FIELDS.map(([key, label, hint]) => <div className="data-row price-row" key={key}>
             <label htmlFor={`p-${key}`} className="data-main"><strong>{label}</strong><span>{hint}</span></label>
             <div className="money-input"><span>GH₵</span><input id={`p-${key}`} type="number" min="0" step="0.5" value={pricing[key]} onChange={(e) => setPricing((p) => ({ ...p, [key]: e.target.value }))} data-testid={`input-pricing-${key}`} /></div>
+          </div>)}
+          <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Service fees & extras</h3></div>
+          {SERVICE_FIELDS.map(([key, label, hint]) => <div className="data-row price-row" key={key}>
+            <label htmlFor={`p-${key}`} className="data-main"><strong>{label}</strong><span>{hint}</span></label>
+            <div className="money-input"><span>GH₵</span><input id={`p-${key}`} type="number" min="0" step="0.5" value={pricing[key] ?? 0} onChange={(e) => setPricing((p) => ({ ...p, [key]: e.target.value }))} data-testid={`input-pricing-${key}`} /></div>
+          </div>)}
+          <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Recurring plan discounts</h3></div>
+          {[['weeklyDiscountPct', 'Weekly plan', 'Off every visit, before tax'], ['monthlyDiscountPct', 'Monthly plan', 'Off every visit, before tax']].map(([k, label, hint]) => <div className="data-row price-row" key={k}>
+            <label htmlFor={`r-${k}`} className="data-main"><strong>{label}</strong><span>{hint}</span></label>
+            <div className="money-input"><input id={`r-${k}`} type="number" min="0" max="90" step="1" value={pricing.recurring[k] ?? 0} onChange={(e) => setPricing((p) => ({ ...p, recurring: { ...p.recurring, [k]: e.target.value } }))} data-testid={`input-recurring-${k}`} /><span>%</span></div>
           </div>)}
           <div className="mini-title" style={{ marginTop: '1.2rem' }}><h3>Waste type surcharges</h3></div>
           {WASTE_TYPES.map(({ value }) => <div className="data-row price-row" key={value}>

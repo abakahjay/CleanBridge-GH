@@ -23,6 +23,7 @@ const Pickups = lazy(() => import('./pages/customer/Pickups.jsx'));
 const PickupDetail = lazy(() => import('./pages/customer/PickupDetail.jsx'));
 const PaymentCallback = lazy(() => import('./pages/customer/PaymentCallback.jsx'));
 const LiveMap = lazy(() => import('./pages/customer/LiveMap.jsx'));
+const Plans = lazy(() => import('./pages/customer/Plans.jsx'));
 const CollectorDashboard = lazy(() => import('./pages/collector/Dashboard.jsx'));
 const CollectorJobs = lazy(() => import('./pages/collector/Jobs.jsx'));
 const CollectorRoute = lazy(() => import('./pages/collector/Route.jsx'));
@@ -39,6 +40,8 @@ const AdminBroadcast = named(() => import('./pages/admin/Operations.jsx'), 'Admi
 const AdminFuel = named(() => import('./pages/admin/Settings.jsx'), 'AdminFuel');
 const AdminPricing = named(() => import('./pages/admin/Settings.jsx'), 'AdminPricing');
 const AdminAnalytics = lazy(() => import('./pages/admin/Analytics.jsx'));
+const AdminDispatch = lazy(() => import('./pages/admin/Dispatch.jsx'));
+const AdminPlans = lazy(() => import('./pages/admin/Plans.jsx'));
 
 function NotFound() {
   return <div className="not-found"><div><Link href="/"><Logo /></Link><h1>404</h1><p>That page is not on today’s collection plan.</p><Link href="/" className="btn btn-primary" data-testid="link-not-found-home"><ArrowLeft size={15} /> Return home</Link></div></div>;
@@ -55,6 +58,7 @@ const PRIVATE_ROUTES = [
   ['/pickups', Pickups, CUSTOMER],
   ['/pickups/:id', PickupDetail],
   ['/map', LiveMap, CUSTOMER],
+  ['/plans', Plans, CUSTOMER],
   ['/payment/callback', PaymentCallback, CUSTOMER],
   ['/notifications', Notifications],
   ['/profile', Profile],
@@ -65,6 +69,8 @@ const PRIVATE_ROUTES = [
   ['/collector/vehicle', CollectorVehicle, COLLECTOR],
   ['/admin/dashboard', AdminDashboard, ADMIN],
   ['/admin/collections', AdminCollections, ADMIN],
+  ['/admin/dispatch', AdminDispatch, ADMIN],
+  ['/admin/plans', AdminPlans, ADMIN],
   ['/admin/customers', AdminCustomers, ADMIN],
   ['/admin/collectors', AdminCollectors, ADMIN],
   ['/admin/payouts', AdminPayouts, ADMIN],

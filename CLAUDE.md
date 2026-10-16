@@ -14,7 +14,7 @@ pnpm is required (a `preinstall` hook rejects npm and yarn). Node 24.
 
 There is no test runner, linter or typecheck. The source is plain JavaScript (`.jsx`/`.js`) on purpose; don't add TypeScript. Verify changes by running both servers and using the app.
 
-`pnpm-workspace.yaml` sets `minimumReleaseAge: 1440` (pnpm refuses package versions published less than a day ago) and pins versions in `catalog:`. esbuild's install script is approved via `allowBuilds`; pnpm 11 refuses to run scripts until it is.
+pnpm settings live in `pnpm-workspace.yaml` (there is no `.npmrc`, so npm prints no warnings). It sets `minimumReleaseAge: 1440` (pnpm refuses package versions published less than a day ago) and pins versions in `catalog:`. esbuild's install script is approved via `allowBuilds`; pnpm 11 refuses to run scripts until it is.
 
 ## Architecture (`artifacts/cleanbridge-gh/src`)
 
@@ -29,10 +29,16 @@ There is no test runner, linter or typecheck. The source is plain JavaScript (`.
   - `components/LocationPicker.jsx`: search-as-you-type via the backend's `/geo/search` (OpenStreetMap merged with ~28k Ghanaian businesses from Overture Maps; results carry `category`, `phone`, `website`), auto-locate with `getBestPosition` (best GPS fix within ~10 s, accuracy circle). Taps never move the pin: "Adjust pin" keeps a centre pin while the map moves, then `/geo/reverse` names the spot.
   - `components/PlacePreview.jsx`: card under the picker with an Esri satellite snapshot and nearby Wikimedia Commons photos (`/geo/photos`), plus phone/website. Keep its credit line (Esri, Wikimedia, OpenStreetMap, Overture) - the licences require it.
 - The server computes prices from the pickup location (distance to the nearest hub). The frontend only displays `/pickups/quote` and never sends a price.
+- Request form (`pages/customer/RequestPickup.jsx`): "How often?" (once / weekly / monthly, discounts from `/settings` `recurring`) and extras (floors to carry down, bin wash). Recurring orders `POST /subscriptions` (first visit booked at once); one-off orders `POST /pickups`. `PriceBreakdown` shows the negative `planDiscount` line. Customers manage plans on `/plans`; admins see them on `/admin/plans`.
+- Area dispatch (`pages/admin/Dispatch.jsx`, `/admin/dispatch`): groups the day's open pickups by neighbourhood (`/admin/dispatch/clusters`) and sends one collector to a whole group (`POST /admin/dispatch`), which lands on their route for that day.
 - Collectors share live GPS every 30 s from `Shell` while not `off_duty`, and customers see it on the pickup page.
 - Live updates: `lib/live.js` keeps one Server-Sent Events stream (`/events?token=`) and fires a `cb:live` window event; `useApi(path, { live: true })` refetches on it. `Shell` shows a toast, plays a chime for new jobs and raises a system notification when the tab is hidden.
 - `Shell`: the logo goes to the homepage (`/`); admins get an "Admin" badge in the top bar (`RoleBadge`).
 - Password reset: `pages/PasswordReset.jsx` (`/forgot-password`, `/reset-password?token=&email=`) using the backend's shared reset flow; the emailed link comes back to this app because the request sends `redirect_uri`.
+- Every platform loads the live site, so a website deploy updates web, Android, Windows and the PWA at once (see the `web-across-platform` skill). Rebuild a shell only when the shell itself changes.
+- Windows app: `desktop/` (Electron, `main.js` loads https://cleanbridge-gh.onrender.com; Google and Paystack hosts stay in the window). Build with `cd desktop && npm install && npm run dist`, bump `version` for each release, and publish `release/CleanBridge-GH-Setup.exe` with `gh release create vX.Y.Z`. The download page links to `releases/latest/download/CleanBridge-GH-Setup.exe`; update the size/version constants in `pages/Download.jsx`. The installer isn't code-signed (SmartScreen: More info → Run anyway).
+- TV remotes: `lib/tvRemote.js` (imported in `main.jsx`) moves focus with the arrow keys on TV browsers or with `?tv=1`. Keep clickable things real `<button>`/`<a>` (or `role="button"` + `tabIndex={0}`).
+- `components/InstallApp.jsx` exports `detectDevice()` (iPad vs Mac by touch) and `isStandalone()` (also true after `?source=app|desktop`); "Get the app" links are hidden inside the installed apps. Download links use `PUBLIC_SITE`, never `window.location`.
 - Installable app: `public/manifest.webmanifest`, `public/sw.js` (network-first pages, cache-first hashed assets, never the API), `/download` serves the Android APK from `public/downloads/`; `public/.well-known/assetlinks.json` ties it to the `com.cleanbridgegh.app` package.
 - Styling: tokens in `index.css` (`:root` / `:root[data-theme='dark']`); component classes for the live app in `app.css`. Use existing classes and `hsl(var(--token))`, not hard-coded colours. Keep adding `data-testid` to interactive elements.
 

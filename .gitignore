@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Desktop app build output (the installer goes to GitHub Releases)
+desktop/release

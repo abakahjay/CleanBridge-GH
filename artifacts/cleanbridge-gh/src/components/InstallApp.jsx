@@ -14,8 +14,28 @@ if (typeof window !== 'undefined') {
   window.addEventListener('appinstalled', () => { deferredPrompt = null; listeners.forEach((fn) => fn(false)); });
 }
 
-const isStandalone = () => window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
-const isIos = () => /iphone|ipad|ipod/i.test(navigator.userAgent) && !/crios|fxios/i.test(navigator.userAgent);
+// The installed apps open `/?source=app` (PWA/Android) or `/?source=desktop`
+// (Windows app); remember that for the rest of the session.
+const APP_FLAG = 'cleanbridge-in-app';
+if (typeof window !== 'undefined' && /[?&]source=(app|desktop)\b/.test(window.location.search)) {
+  try { sessionStorage.setItem(APP_FLAG, '1'); } catch { /* storage blocked */ }
+}
+const launchedFromApp = () => { try { return sessionStorage.getItem(APP_FLAG) === '1'; } catch { return false; } };
+
+// Running as the installed app (PWA, Android app or desktop window).
+export const isStandalone = () => typeof window !== 'undefined'
+  && (window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true || launchedFromApp());
+
+// iPadOS reports itself as a Mac: tell them apart by touch support.
+export function detectDevice() {
+  const ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1);
+  const os = ios ? 'ios' : /Android/.test(ua) ? 'android' : /Windows/.test(ua) ? 'windows' : /Macintosh/.test(ua) ? 'mac' : /CrOS/.test(ua) ? 'chromeos' : 'other';
+  const browser = /Edg\//.test(ua) ? 'edge' : /SamsungBrowser/.test(ua) ? 'samsung' : /Firefox|FxiOS/.test(ua) ? 'firefox' : /CriOS|Chrome/.test(ua) ? 'chrome' : /Safari/.test(ua) ? 'safari' : 'other';
+  return { os, browser, ios };
+}
+
+const isIos = () => detectDevice().ios && !/crios|fxios/i.test(navigator.userAgent);
 
 export default function InstallApp({ className = 'btn btn-secondary btn-sm', label = 'Install app' }) {
   const [canPrompt, setCanPrompt] = useState(Boolean(deferredPrompt));
