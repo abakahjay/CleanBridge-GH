@@ -42,7 +42,7 @@ export default function Privacy() {
       <p>Passwords are stored hashed, connections use HTTPS, and access to operations tools is limited to authorised staff. We keep account data while your account is active and financial records as long as the law requires.</p>
 
       <h2>Children</h2>
-      <p>CleanBridge GH is not intended for children under 13.</p>
+      <p>You must be 16 or older to create a CleanBridge GH account (see our <Link href="/terms">terms of use</Link>). We do not knowingly collect data from younger people and delete any such account when we learn of it.</p>
 
       <h2>Contact</h2>
       <p>Questions or requests: <a href={whatsappLink('Hello CleanBridge GH, I have a privacy question.')} target="_blank" rel="noopener noreferrer"><WhatsAppIcon size={14} /> WhatsApp {WHATSAPP_DISPLAY}</a>, or reply to any CleanBridge email.</p>

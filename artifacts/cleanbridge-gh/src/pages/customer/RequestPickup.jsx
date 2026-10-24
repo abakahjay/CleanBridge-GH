@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { ArrowLeft, ArrowRight, Banknote, Building2, CalendarClock, Check, CircleAlert, Droplets, Minus, Plus, Repeat, Smartphone, Truck, Zap } from 'lucide-react';
 import Shell from '../../components/Shell.jsx';
 import LocationPicker from '../../components/LocationPicker.jsx';
@@ -292,6 +292,9 @@ export default function RequestPickup() {
           </div>
         </div>}
 
+        {step === 3 && recurring && <p className="plan-terms" data-testid="text-plan-terms">
+          <Repeat size={13} /> Your {frequency} plan books a visit {frequency === 'weekly' ? 'every week' : 'every month'}{quote ? ` at about ${cedi(quote.total)} each` : ''} until you pause or cancel it in <strong>My plans</strong>. You are not charged automatically: each visit is paid separately, online or in cash. See the <Link href="/terms">terms</Link>.
+        </p>}
         <div className="wizard-nav">
           {step > 1 ? <button className="btn btn-outline" onClick={() => setStep(step - 1)} data-testid="button-pickup-back"><ArrowLeft size={15} /> Back</button> : <span />}
           {step < 3

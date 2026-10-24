@@ -31,6 +31,8 @@ packages:
   - artifacts/*
 
 catalog:
+  "@fontsource/dm-sans": ^5.2.8
+  "@fontsource/space-grotesk": ^5.2.10
   "@tailwindcss/vite": ^4.1.14
   "@vitejs/plugin-react": ^5.0.4
   leaflet: ^1.9.4

@@ -50,6 +50,8 @@ export default function AuthPage({ mode }) {
   const [touched, setTouched] = useState({});
   const [error, setError] = useState(params.get('error') || '');
   const [submitting, setSubmitting] = useState(false);
+  const [agreed, setAgreed] = useState(false); // age + terms, required for both email and Google sign-up
+  const AGREE_FIRST = 'Please confirm you are 16 or older and agree to the terms of use.';
 
   useEffect(() => { setError(params.get('error') || ''); }, [mode]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -65,6 +67,7 @@ export default function AuthPage({ mode }) {
   const submit = async (e) => {
     e.preventDefault();
     setError('');
+    if (register && !agreed) { setError(AGREE_FIRST); return; }
     if (register && !isValidGhanaPhone(form.phone)) { setTouched((t) => ({ ...t, phone: true })); return; }
     setSubmitting(true);
     try {
@@ -111,7 +114,12 @@ export default function AuthPage({ mode }) {
             </button>)}
         </div>}
 
-        <a className="btn btn-google" href={googleSignInUrl(register ? role : 'customer')} data-testid="button-google">
+        {register && <label className="consent-row" data-testid="label-consent">
+          <input type="checkbox" checked={agreed} onChange={(e) => { setAgreed(e.target.checked); if (e.target.checked && error === AGREE_FIRST) setError(''); }} required data-testid="checkbox-consent" />
+          <span>I’m 16 or older and agree to the <Link href="/terms">terms of use</Link> and <Link href="/privacy">privacy policy</Link>.</span>
+        </label>}
+
+        <a className="btn btn-google" href={googleSignInUrl(register ? role : 'customer')} onClick={(e) => { if (register && !agreed) { e.preventDefault(); setError(AGREE_FIRST); } }} data-testid="button-google">
           <GoogleIcon /> {register ? 'Sign up with Google' : 'Continue with Google'}
         </a>
         <div className="auth-divider"><span>or with your {register ? 'details' : 'email or phone'}</span></div>
@@ -150,7 +158,8 @@ export default function AuthPage({ mode }) {
           </button>
         </form>
 
-        {register && <p className="auth-legal">By continuing you agree to CleanBridge GH’s <Link href="/privacy">privacy policy</Link>. Your number is only shared with the collector handling your pickup.</p>}
+        {register && <p className="auth-legal">Your number is only shared with the collector handling your pickup.</p>}
+        {!register && <p className="auth-legal">By continuing you agree to CleanBridge GH’s <Link href="/terms">terms of use</Link> and <Link href="/privacy">privacy policy</Link>.</p>}
         <div className="form-foot">
           {register ? <>Already have an account? <Link href="/login" data-testid="link-switch-login">Log in</Link></> : <>New to CleanBridge? <Link href="/register" data-testid="link-switch-register">Create an account</Link></>}
         </div>

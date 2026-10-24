@@ -9,6 +9,7 @@ import WhatsAppButton from './components/WhatsAppButton.jsx';
 import Landing from './pages/Landing.jsx';
 import AuthPage, { AuthCallback } from './pages/Auth.jsx';
 import Privacy from './pages/Privacy.jsx';
+import Terms from './pages/Terms.jsx';
 import Download from './pages/Download.jsx';
 import About from './pages/About.jsx';
 import { ForgotPassword, ResetPassword } from './pages/PasswordReset.jsx';
@@ -89,6 +90,7 @@ function Routes() {
     <Route path="/register"><AuthPage mode="register" /></Route>
     <Route path="/auth/callback" component={AuthCallback} />
     <Route path="/privacy" component={Privacy} />
+    <Route path="/terms" component={Terms} />
     <Route path="/download" component={Download} />
     <Route path="/about" component={About} />
     <Route path="/forgot-password" component={ForgotPassword} />

@@ -9,6 +9,8 @@
     "serve": "vite preview --config vite.config.js --host 0.0.0.0"
   },
   "devDependencies": {
+    "@fontsource/dm-sans": "catalog:",
+    "@fontsource/space-grotesk": "catalog:",
     "@tailwindcss/vite": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "leaflet": "catalog:",
