@@ -49,3 +49,10 @@ pnpm settings live in `pnpm-workspace.yaml` (there is no `.npmrc`, so npm prints
 - `components/PushToggle.jsx` is the "Phone notifications" panel on Profile.
 - `lib/auth.jsx` relinks the device after `/auth/me`.
 - Every backend `notify()` is also pushed.
+
+## Legal and security (keep these)
+
+- Sign-up (email **and** Google) needs the "I'm 16 or older and agree to the terms of use and privacy policy" checkbox in `pages/Auth.jsx`; the Google link does nothing until it is ticked.
+- `/terms` (`pages/Terms.jsx`) and `/privacy` must stay accurate: plans run until paused or cancelled and are never charged automatically; copyright complaints go through WhatsApp/email. Update the date when you change them.
+- Fonts are bundled with `@fontsource/*` (imported in `main.jsx`). Never link Google Fonts: it sends every visitor's IP to Google (GDPR).
+- The plan step shows the schedule, price per visit and how to cancel next to the Start plan button; keep that if you change the button.
