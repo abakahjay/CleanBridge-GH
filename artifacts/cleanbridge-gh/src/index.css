@@ -112,6 +112,12 @@ a { color: inherit; text-decoration: none; }
 .hero-copy { max-width: 650px; }
 .hero h1 { margin: 1rem 0 1.4rem; max-width: 680px; font-size: clamp(3.2rem, 7vw, 6.6rem); line-height: .94; }
 .hero h1 span { color: hsl(var(--secondary)); }
+/* Rotating hero word (components/RotatingWords.jsx): one grid cell, masked vertical swap. */
+.rotating-words { display: inline-grid; vertical-align: bottom; overflow: hidden; padding-bottom: .12em; margin-bottom: -.12em; }
+.rotating-words > span { grid-area: 1 / 1; white-space: nowrap; opacity: 0; transform: translateY(105%); transition: transform .7s cubic-bezier(.65, 0, .35, 1), opacity .7s ease; }
+.rotating-words > span.is-active { opacity: 1; transform: none; }
+.rotating-words > span.is-leaving { transform: translateY(-105%); }
+@media (prefers-reduced-motion: reduce) { .rotating-words > span { transition: none; } }
 .hero-sub { max-width: 500px; color: rgba(255,255,255,.7); font-size: 1.04rem; line-height: 1.65; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 2.1rem; }
 .hero-orbit { position: relative; min-height: 420px; }

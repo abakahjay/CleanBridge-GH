@@ -4,7 +4,11 @@ import { MISSION, VISION } from '../content/about.js';
 import { homeFor, useAuth } from '../lib/auth.jsx';
 import { Logo, ThemeToggle, WhatsAppIcon } from '../components/ui.jsx';
 import { isStandalone } from '../components/InstallApp.jsx';
+import { RotatingWords } from '../components/RotatingWords.jsx';
 import { AUTHOR_NAME, PORTFOLIO_URL, WHATSAPP_DISPLAY, whatsappLink } from '../lib/contact.js';
+
+// Places the hero cycles through: the households and businesses CleanBridge serves.
+const HERO_PLACES = ['your gate.', 'your shop.', 'your salon.', 'your office.'];
 
 const AREAS = ['Accra', 'Tema', 'Kasoa', 'Madina', 'Kumasi', 'Takoradi', 'Cape Coast', 'Koforidua', 'Ho', 'Sunyani', 'Tamale'];
 
@@ -31,7 +35,7 @@ export default function Landing() {
       <div className="hero-inner">
         <div className="hero-copy fade-in">
           <div className="eyebrow" style={{ color: 'hsl(var(--secondary))' }}>Household waste, handled properly</div>
-          <h1>Cleaner streets start at <span>your gate.</span></h1>
+          <h1>Cleaner streets start at <span><RotatingWords words={HERO_PLACES} /></span></h1>
           <p className="hero-sub">CleanBridge GH connects homes with trusted collectors across Ghana. Book in a minute, pay with Mobile Money or cash, and follow your collector live on the map.</p>
           <div className="hero-actions">
             <Link className="btn btn-secondary" href="/pickup" data-testid="button-request-pickup">Request a pickup <ArrowRight size={16} /></Link>
